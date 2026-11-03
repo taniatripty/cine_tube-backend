@@ -1,0 +1,48 @@
+// {
+//   // Visit https://aka.ms/tsconfig to read more about this file
+//   "compilerOptions": {
+
+//     "rootDir": "./src",
+//     "outDir": "./dist",
+
+
+//     "module": "Esnext",
+//     "target": "ES2023",
+       
+//     "types": ["node"],
+
+//     "sourceMap": true,
+//     "declaration": true,
+//     "declarationMap": true,
+
+//     "noUncheckedIndexedAccess": true,
+//     "exactOptionalPropertyTypes": true,
+
+//     "strict": true,
+//     "jsx": "react-jsx",
+    
+//     "isolatedModules": true,
+//     "noUncheckedSideEffectImports": true,
+//     "moduleDetection": "force",
+//     "skipLibCheck": true,
+//   }
+// }
+
+{
+  "compilerOptions": {
+    "module": "ESNext", 
+     "moduleResolution": "bundler", 
+     "target": "ES2023",
+      "types": ["node"],                              
+    "rootDir": ".",
+    "outDir": "./dist",  
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+     "ignoreDeprecations": "6.0"
+  },
+  "include": ["src/**/*.ts",
+   "prisma7.config.ts"],
+  "exclude": ["node_modules", "dist"]
+}

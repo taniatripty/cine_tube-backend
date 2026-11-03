@@ -1,0 +1,10 @@
+
+model Person {
+    id        String   @id @default(cuid())
+    name      String
+    biography String?
+  photo     String?
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    isDeleted Boolean  @default(false)
+}
