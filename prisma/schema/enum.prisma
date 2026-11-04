@@ -1,0 +1,10 @@
+enum MediaType {
+  MOVIE
+  SERIES
+}
+
+enum MediaStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}

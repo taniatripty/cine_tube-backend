@@ -1,0 +1,22 @@
+model Media {
+    id        String   @id @default(cuid())
+   title       String
+  synopsis    String
+
+  poster      String?
+  backdrop    String?
+
+  type MediaType
+
+  releaseDate DateTime?
+  releaseYear Int?
+  runtime     Int?
+
+  isPremium Boolean  @default(false)
+  price      Decimal? @db.Decimal(10, 2)
+
+   status MediaStatus @default(DRAFT)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    isDeleted Boolean  @default(false)
+}
