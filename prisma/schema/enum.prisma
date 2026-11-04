@@ -8,6 +8,7 @@ enum MediaStatus {
   PUBLISHED
   ARCHIVED
 }
+
 enum CreditRole {
   DIRECTOR
   WRITER

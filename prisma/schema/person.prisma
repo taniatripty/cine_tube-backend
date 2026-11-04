@@ -1,14 +1,14 @@
-
 model Person {
-    id        String   @id @default(cuid())
-    name      String
-    biography String?
+  id        String        @id @default(cuid())
+  name      String
+  biography String?
   photo     String?
-  credits MediaCredit[]
-  
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-    isDeleted Boolean  @default(false)
-    @@index([name])
-    @@map("people")
+  credits   MediaCredit[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isDeleted Boolean  @default(false)
+
+  @@index([name])
+  @@map("people")
 }

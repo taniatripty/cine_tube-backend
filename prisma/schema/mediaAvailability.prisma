@@ -1,0 +1,17 @@
+model MediaAvailability {
+  id         String @id @default(cuid())
+  mediaId    String
+  platformId String
+
+  streamingUrl String
+  region       String @default("GLOBAL")
+
+  availableFrom  DateTime?
+  availableUntil DateTime?
+
+  media    Media             @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+  Platform StreamingPlatform @relation(fields: [platformId], references: [id], onDelete: Cascade)
+
+  @@unique([mediaId, platformId, region])
+  @@index([platformId])
+}

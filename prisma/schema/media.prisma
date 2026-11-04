@@ -1,10 +1,10 @@
 model Media {
-    id        String   @id @default(cuid())
-   title       String
-  synopsis    String
+  id       String @id @default(cuid())
+  title    String
+  synopsis String
 
-  poster      String?
-  backdrop    String?
+  poster   String?
+  backdrop String?
 
   type MediaType
 
@@ -12,18 +12,19 @@ model Media {
   releaseYear Int?
   runtime     Int?
 
-  isPremium Boolean  @default(false)
-  price      Decimal? @db.Decimal(10, 2)
-  averageRating Float @default(0)
-  ratingCount   Int   @default(0)
-  reviewCount   Int   @default(0)
-   genres Genre[]
+  isPremium           Boolean             @default(false)
+  price               Decimal?            @db.Decimal(10, 2)
+  averageRating       Float               @default(0)
+  ratingCount         Int                 @default(0)
+  reviewCount         Int                 @default(0)
+  genres              Genre[]
+  mediaAvailabilities MediaAvailability[]
+  credits             MediaCredit[]
+  status              MediaStatus         @default(DRAFT)
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+  isDeleted           Boolean             @default(false)
 
-  credits MediaCredit[]
-  status MediaStatus @default(DRAFT)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  isDeleted Boolean  @default(false)
   @@index([title])
   @@index([releaseDate])
   @@map("media")
