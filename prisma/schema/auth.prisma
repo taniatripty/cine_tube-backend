@@ -8,7 +8,8 @@ model User {
   updatedAt     DateTime  @updatedAt
   sessions      Session[]
   accounts      Account[]
-
+wishList  Wishlist[]
+reviews  Review[]
   @@unique([email])
   @@map("user")
 }
@@ -22,6 +23,7 @@ model Session {
   ipAddress String?
   userAgent String?
   userId    String
+  
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([token])

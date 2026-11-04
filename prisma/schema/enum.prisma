@@ -16,3 +16,31 @@ enum CreditRole {
   PRODUCER
   CINEMATOGRAPHER
 }
+
+enum ReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  UNPUBLISHED
+}
+
+enum CommentStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  HIDDEN
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  REFUNDED
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELLED
+  EXPIRED
+  PAST_DUE
+}
