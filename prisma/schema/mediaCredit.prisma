@@ -1,0 +1,16 @@
+model MediaCredit {
+  id       String    @id @default(cuid())
+  mediaId  String
+  personId String
+
+  role          CreditRole
+  characterName String?
+  displayOrder  Int @default(0)
+
+media Media @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+person Person @relation(fields: [personId], references: [id],onDelete: Cascade)
+  @@unique([mediaId, personId, role])
+  @@index([personId])
+  @@index([mediaId, role])
+  @@map("mediaCredits")
+}

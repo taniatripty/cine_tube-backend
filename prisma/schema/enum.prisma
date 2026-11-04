@@ -8,3 +8,10 @@ enum MediaStatus {
   PUBLISHED
   ARCHIVED
 }
+enum CreditRole {
+  DIRECTOR
+  WRITER
+  ACTOR
+  PRODUCER
+  CINEMATOGRAPHER
+}

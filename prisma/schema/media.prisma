@@ -14,9 +14,17 @@ model Media {
 
   isPremium Boolean  @default(false)
   price      Decimal? @db.Decimal(10, 2)
+  averageRating Float @default(0)
+  ratingCount   Int   @default(0)
+  reviewCount   Int   @default(0)
+   genres Genre[]
 
-   status MediaStatus @default(DRAFT)
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-    isDeleted Boolean  @default(false)
+  credits MediaCredit[]
+  status MediaStatus @default(DRAFT)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isDeleted Boolean  @default(false)
+  @@index([title])
+  @@index([releaseDate])
+  @@map("media")
 }

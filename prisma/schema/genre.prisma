@@ -3,5 +3,7 @@ model Genre {
     name      String
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
+    media     Media[] 
     isDeleted Boolean  @default(false)
+    @@map("genre")
 }
