@@ -1,0 +1,21 @@
+model Episode {
+  id            String @id @default(cuid())
+  seasonId      String
+
+  episodeNumber Int
+  title         String
+  synopsis      String?
+
+  runtime   Int?
+  thumbnail String?
+  videoUrl  String?
+
+ season Season @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([seasonId, episodeNumber])
+  @@index([seasonId])
+  @@map("episode")
+}
