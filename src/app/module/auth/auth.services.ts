@@ -1,4 +1,5 @@
 import { auth } from "../../lib/auth";
+import { tokenUtils } from "../../utils/token";
 
 type RegisterUserPayload = {
   name: string;
@@ -21,8 +22,32 @@ const registerUser = async (payload: RegisterUserPayload) => {
       password,
     },
   });
+   const accessToken =tokenUtils.getAccessToken({
+        userId: data.user.id,
+        role: data.user.role,
+        name: data.user.name,
+        email: data.user.email,
+        status: data.user.status,
+        
+    });
 
-  return data;
+    const refreshToken = tokenUtils.getRefreshToken({
+        userId: data.user.id,
+        role: data.user.role,
+        name: data.user.name,
+        email: data.user.email,
+        status: data.user.status,
+        
+      
+    });
+
+
+
+  return {
+    ...data,
+    accessToken,
+    refreshToken,
+  }
 };
 
 const loginUser = async (payload: LoginUserPayload) => {
@@ -35,7 +60,27 @@ const loginUser = async (payload: LoginUserPayload) => {
     },
   });
 
-  return data;
+  const accessToken = tokenUtils.getAccessToken({
+    userId: data.user.id,
+    role: data.user.role,
+    name: data.user.name,
+    email: data.user.email,
+    status: data.user.status,
+  });
+
+  const refreshToken = tokenUtils.getRefreshToken({
+    userId: data.user.id,
+    role: data.user.role,
+    name: data.user.name,
+    email: data.user.email,
+    status: data.user.status,
+  });
+
+  return {
+    ...data,
+    accessToken,
+    refreshToken,
+  };
 };
 
 export const authService = {
