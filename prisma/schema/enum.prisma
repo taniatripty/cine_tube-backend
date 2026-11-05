@@ -1,6 +1,18 @@
+enum UserRole {
+  USER
+  ADMIN
+ 
+}
+
 enum MediaType {
   MOVIE
   SERIES
+}
+
+enum UserStatus {
+  ACTIVE
+  BLOCKED
+  DELETED
 }
 
 enum MediaStatus {
