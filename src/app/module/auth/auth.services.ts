@@ -6,6 +6,11 @@ type RegisterUserPayload = {
   password: string;
 };
 
+type LoginUserPayload = {
+  email: string;
+  password: string;
+};
+
 const registerUser = async (payload: RegisterUserPayload) => {
   const { name, email, password } = payload;
 
@@ -20,6 +25,20 @@ const registerUser = async (payload: RegisterUserPayload) => {
   return data;
 };
 
+const loginUser = async (payload: LoginUserPayload) => {
+  const { email, password } = payload;
+
+  const data = await auth.api.signInEmail({
+    body: {
+      email,
+      password,
+    },
+  });
+
+  return data;
+};
+
 export const authService = {
   registerUser,
+  loginUser,
 };

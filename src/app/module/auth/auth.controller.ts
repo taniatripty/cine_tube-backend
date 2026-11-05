@@ -3,14 +3,30 @@ import catchAsync from "../../shared/catchAsync";
 import sendResponse from "../../shared/sendResponse";
 import { authService } from "./auth.services";
 
-export const register: RequestHandler = catchAsync(async (req: Request, res: Response) => {
-  const data = await authService.registerUser(req.body);
+export const register: RequestHandler = catchAsync(
+  async (req: Request, res: Response) => {
+    const data = await authService.registerUser(req.body);
 
-  sendResponse({
-    res,
-    statusCode: 201,
-    success: true,
-    message: "Registration successful.",
-    data,
-  });
-});
+    sendResponse({
+      res,
+      statusCode: 201,
+      success: true,
+      message: "Registration successful.",
+      data,
+    });
+  },
+);
+
+export const login: RequestHandler = catchAsync(
+  async (req: Request, res: Response) => {
+    const data = await authService.loginUser(req.body);
+
+    sendResponse({
+      res,
+      statusCode: 200,
+      success: true,
+      message: "Login successful.",
+      data,
+    });
+  },
+);
