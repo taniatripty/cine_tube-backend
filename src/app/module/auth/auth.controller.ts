@@ -4,7 +4,7 @@ import sendResponse from "../../shared/sendResponse";
 import { authService } from "./auth.services";
 import { tokenUtils } from "../../utils/token";
 
-export const register = catchAsync(
+ const register = catchAsync(
   async (req: Request, res: Response) => {
     const data = await authService.registerUser(req.body);
 
@@ -28,7 +28,7 @@ export const register = catchAsync(
   },
 );
 
-export const login = catchAsync(
+ const login = catchAsync(
   async (req: Request, res: Response) => {
     const data = await authService.loginUser(req.body);
     const { accessToken, refreshToken, token, ...rest } = data;
@@ -52,7 +52,7 @@ export const login = catchAsync(
   },
 );
 
-export const getAllUsers = catchAsync(
+ const getAllUsers = catchAsync(
   async (_req: Request, res: Response) => {
     const data = await authService.getAllUsers();
 
@@ -65,3 +65,22 @@ export const getAllUsers = catchAsync(
     });
   },
 );
+
+const getMe = catchAsync(async (req: Request, res: Response) => {
+  const result = await authService.getMe(req.user);
+
+  sendResponse({
+    res,
+    statusCode: 200,
+    success: true,
+    message: "User profile fetched successfully.",
+    data: result,
+  });
+});
+
+export const authcontroller={
+  register,
+  login,
+  getAllUsers,
+  getMe,
+};

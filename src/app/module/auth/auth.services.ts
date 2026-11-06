@@ -1,5 +1,6 @@
 import { auth } from "../../lib/auth";
 import { prisma } from "../../lib/prisma";
+import { IRequest } from "../../interface/requestUser.interface";
 import { tokenUtils } from "../../utils/token";
 
 type RegisterUserPayload = {
@@ -103,8 +104,35 @@ const getAllUsers = async () => {
   return data;
 };
 
+const getMe = async (user: IRequest) => {
+  const existingUser = await prisma.user.findUnique({
+    where: {
+      id: user.userId,
+    },
+    include: {
+      wishList: {
+        include: {
+          media: true,
+        },
+      },
+      reviews: {
+        include: {
+          media: true,
+        },
+      },
+    },
+  });
+
+  if (!existingUser) {
+    throw new Error("User does not exist.");
+  }
+
+  return existingUser;
+};
+
 export const authService = {
   registerUser,
   loginUser,
   getAllUsers,
+  getMe,
 };
