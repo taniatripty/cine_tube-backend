@@ -1,10 +1,10 @@
-import { Request, Response, RequestHandler } from "express";
+import { Request, Response } from "express";
 import catchAsync from "../../shared/catchAsync";
 import sendResponse from "../../shared/sendResponse";
 import { authService } from "./auth.services";
 import { tokenUtils } from "../../utils/token";
 
-export const register: RequestHandler = catchAsync(
+export const register = catchAsync(
   async (req: Request, res: Response) => {
     const data = await authService.registerUser(req.body);
 
@@ -28,7 +28,7 @@ export const register: RequestHandler = catchAsync(
   },
 );
 
-export const login: RequestHandler = catchAsync(
+export const login = catchAsync(
   async (req: Request, res: Response) => {
     const data = await authService.loginUser(req.body);
     const { accessToken, refreshToken, token, ...rest } = data;
@@ -48,6 +48,20 @@ export const login: RequestHandler = catchAsync(
         refreshToken,
         ...rest,
       },
+    });
+  },
+);
+
+export const getAllUsers = catchAsync(
+  async (_req: Request, res: Response) => {
+    const data = await authService.getAllUsers();
+
+    sendResponse({
+      res,
+      statusCode: 200,
+      success: true,
+      message: "Users retrieved successfully.",
+      data,
     });
   },
 );

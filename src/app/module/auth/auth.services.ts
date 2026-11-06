@@ -1,4 +1,5 @@
 import { auth } from "../../lib/auth";
+import { prisma } from "../../lib/prisma";
 import { tokenUtils } from "../../utils/token";
 
 type RegisterUserPayload = {
@@ -83,7 +84,27 @@ const loginUser = async (payload: LoginUserPayload) => {
   };
 };
 
+const getAllUsers = async () => {
+  const data=prisma.user.findMany({
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      image: true,
+      role: true,
+      status: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+  return data;
+};
+
 export const authService = {
   registerUser,
   loginUser,
+  getAllUsers,
 };
