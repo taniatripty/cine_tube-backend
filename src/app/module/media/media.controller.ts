@@ -17,6 +17,43 @@ const createMovie = catchAsync(
   },
 );
 
+const getAllMedia = catchAsync(async (_req: Request, res: Response) => {
+  const data = await mediaService.getAllMedia();
+
+  sendResponse({
+    res,
+    statusCode: 200,
+    success: true,
+    message: "Media retrieved successfully.",
+    data,
+  });
+});
+
+const getMediaById = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const data = await mediaService.getMediaById(id as string);
+
+  if (!data) {
+    sendResponse({
+      res,
+      statusCode: 404,
+      success: false,
+      message: "Media not found.",
+    });
+    return;
+  }
+
+  sendResponse({
+    res,
+    statusCode: 200,
+    success: true,
+    message: "Media retrieved successfully.",
+    data,
+  });
+});
+
 export const mediaController = {
   createMovie,
+  getAllMedia,
+  getMediaById,
 };

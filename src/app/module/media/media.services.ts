@@ -16,6 +16,36 @@ const createMovie = async (payload: TCreateMovieInput) => {
   });
 };
 
+const getAllMedia = async () => {
+  const result=prisma.media.findMany({
+    where: {
+      isDeleted: false,
+    },
+    include: {
+      genres: true,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+  return result;
+};
+
+const getMediaById = async (id: string) => {
+  const result=prisma.media.findFirst({
+    where: {
+      id,
+      isDeleted: false,
+    },
+    include: {
+      genres: true,
+    },
+  });
+  return result;
+};
+
 export const mediaService = {
   createMovie,
+  getAllMedia,
+  getMediaById,
 };

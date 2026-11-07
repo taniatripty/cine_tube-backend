@@ -2,9 +2,10 @@ import { prisma } from "../../lib/prisma";
 import { TCreateGenreInput } from "./genre.interface";
 
 const createGenre = async (payload: TCreateGenreInput) => {
-  return prisma.genre.create({
+   const result=prisma.genre.create({
     data: payload,
   });
+  return result;
 };
 
 export const genreService = {
