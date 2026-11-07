@@ -1,5 +1,5 @@
 model Episode {
-  id            String @id @default(cuid())
+  id            String @id @default(uuid())
   seasonId      String
 
   episodeNumber Int

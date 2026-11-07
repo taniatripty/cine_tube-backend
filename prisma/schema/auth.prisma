@@ -11,8 +11,9 @@ model User {
   updatedAt     DateTime  @updatedAt
   sessions      Session[]
   accounts      Account[]
-wishList  Wishlist[]
+watchList  WatchList[]
 reviews  Review[]
+reviewLikes ReviewLike[]
   @@unique([email])
   @@map("user")
 }

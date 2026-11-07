@@ -1,5 +1,5 @@
 model MediaCredit {
-  id       String @id @default(cuid())
+  id       String @id @default(uuid())
   mediaId  String
   personId String
 

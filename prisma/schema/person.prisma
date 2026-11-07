@@ -1,5 +1,5 @@
 model Person {
-  id        String        @id @default(cuid())
+  id        String        @id @default(uuid())
   name      String
   biography String?
   photo     String?

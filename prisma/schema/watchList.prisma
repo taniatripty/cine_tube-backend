@@ -1,4 +1,4 @@
-model Wishlist {
+model WatchList {
   userId  String
   mediaId String
 
@@ -9,5 +9,5 @@ model Wishlist {
  
   @@id([userId, mediaId])
   @@index([mediaId])
-    @@map("wishlist")
+    @@map("watchlist")
 }

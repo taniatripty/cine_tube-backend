@@ -1,5 +1,5 @@
 model Review {
-  id      String @id @default(cuid())
+  id      String @id @default(uuid())
   userId  String
   mediaId String
 
@@ -13,6 +13,8 @@ model Review {
   moderatedById  String?
   moderatedAt    DateTime?
   moderationNote String?
+    tags     Tag[]
+    reviewLikes ReviewLike[]
 user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
   media Media @relation(fields: [mediaId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())

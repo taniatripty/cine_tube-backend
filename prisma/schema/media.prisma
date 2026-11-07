@@ -21,7 +21,7 @@ model Media {
   mediaAvailabilities MediaAvailability[]
   credits             MediaCredit[]
   seasons            Season[]
-  wishLists           Wishlist[]
+  watchLists           WatchList[]
   reviews             Review[]
   status              MediaStatus         @default(DRAFT)
   createdAt           DateTime            @default(now())
