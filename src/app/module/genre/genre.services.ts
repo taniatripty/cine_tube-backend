@@ -8,6 +8,18 @@ const createGenre = async (payload: TCreateGenreInput) => {
   return result;
 };
 
+const getAllGenres = async () => {
+  return prisma.genre.findMany({
+    where: {
+      isDeleted: false,
+    },
+    orderBy: {
+      name: "asc",
+    },
+  });
+};
+
 export const genreService = {
   createGenre,
+  getAllGenres,
 };

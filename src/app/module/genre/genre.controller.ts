@@ -15,6 +15,19 @@ const createGenre = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const getAllGenres = catchAsync(async (_req: Request, res: Response) => {
+  const data = await genreService.getAllGenres();
+
+  sendResponse({
+    res,
+    statusCode: 200,
+    success: true,
+    message: "Genres retrieved successfully.",
+    data,
+  });
+});
+
 export const genreController = {
   createGenre,
+  getAllGenres,
 };

@@ -7,6 +7,11 @@ import { createGenreValidation } from "./genre.validation";
 
 const router = Router();
 
+router.get(
+  "/",
+  checkAuth(UserRole.ADMIN, UserRole.USER),
+  genreController.getAllGenres,
+);
 router.post(
   "/",
   checkAuth(UserRole.ADMIN,UserRole.USER),
