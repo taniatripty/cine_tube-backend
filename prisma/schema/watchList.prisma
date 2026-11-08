@@ -4,10 +4,10 @@ model WatchList {
 
   createdAt DateTime @default(now())
 
-    user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-    media Media @relation(fields: [mediaId], references: [id], onDelete: Cascade)
- 
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  media Media @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+
   @@id([userId, mediaId])
   @@index([mediaId])
-    @@map("watchlist")
+  @@map("watchlist")
 }

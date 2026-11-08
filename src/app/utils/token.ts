@@ -4,6 +4,22 @@ import { envVars } from "../config/env";
 import { cookieUtils } from "./cookie";
 import { jwtutils } from "./jwt";
 
+const configuredAccessTokenExpiresIn =
+  envVars.ACCESS_TOKEN_EXPIRESIN.trim();
+const accessTokenExpiresInPattern =
+  /^\d+(?:\.\d+)?\s*(?:ms|milliseconds?|s|seconds?|m|minutes?|h|hours?|d|days?|w|weeks?|y|years?)$/i;
+const accessTokenExpiresIn = accessTokenExpiresInPattern.test(
+  configuredAccessTokenExpiresIn,
+)
+  ? configuredAccessTokenExpiresIn
+  : "1d";
+
+if (accessTokenExpiresIn !== configuredAccessTokenExpiresIn) {
+  console.warn(
+    "Invalid ACCESS_TOKEN_EXPIRESIN; using the one-day fallback (1d).",
+  );
+}
+
 
 
 const getAccessToken = (payload: JwtPayload) => {
@@ -11,7 +27,7 @@ const getAccessToken = (payload: JwtPayload) => {
     payload,
     envVars.ACCESS_TOKEN_SECRET,
     {
-      expiresIn: envVars.ACCESS_TOKEN_EXPIRESIN,
+      expiresIn: accessTokenExpiresIn,
     } as SignOptions,
   );
   return accessToken;
@@ -33,8 +49,8 @@ const setAccessToken = (res: Response, token: string) => {
     secure: true,
     sameSite: "none",
     path: "/",
-    //15m
-    maxAge: 60 * 15 * 1000,
+    //1d
+    maxAge: 60 * 60 * 24 * 1000,
   });
 }   
 
@@ -55,7 +71,7 @@ const setBetterAuthCookie = (res: Response, token: string) => {
     secure: true,
     sameSite: "none",
     path: "/",
-    //7d
+    //1d
     maxAge: 60 * 60 * 24 * 1000,
   });
 };
@@ -71,4 +87,3 @@ export const tokenUtils = {
   setAccessTokenCookie: setAccessToken,
   setBetterAuthCookie
 };
-

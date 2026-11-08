@@ -3,6 +3,8 @@ import catchAsync from "../../shared/catchAsync";
 import sendResponse from "../../shared/sendResponse";
 import { authService } from "./auth.services";
 import { tokenUtils } from "../../utils/token";
+import AppError from "../../errorHandler/AppError";
+import status from "http-status";
 
  const register = catchAsync(
   async (req: Request, res: Response) => {
@@ -78,9 +80,43 @@ const getMe = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const getnewRefreshToken = async (req: Request, res: Response) => {
+  const refreshToken = req.cookies.refreshToken;
+  const betterAuthSessionToken = req.cookies["better-auth.session_token"];
+  if (!refreshToken || !betterAuthSessionToken) {
+    throw new AppError(
+      status.UNAUTHORIZED,
+      !refreshToken
+        ? "Refresh token cookie is missing"
+        : "Session token cookie is missing",
+    );
+  }
+  const result = await authService.getnewRefreshToken(
+    refreshToken,
+    betterAuthSessionToken,
+  );
+  const { accessToken, refreshToken: newrefreshToken, sessionToken } = result;
+  tokenUtils.setAccessToken(res, accessToken);
+  tokenUtils.setRefreshTokenCookie(res, newrefreshToken);
+  tokenUtils.setBetterAuthCookie(res, sessionToken);
+
+  sendResponse({
+    res,
+    statusCode: status.OK,
+    success: true,
+    message: "New tokens generated successfully",
+    data: {
+      accessToken,
+      refreshToken: newrefreshToken,
+      sessionToken,
+    },
+  });
+};
+
 export const authcontroller={
   register,
   login,
   getAllUsers,
   getMe,
+  getnewRefreshToken
 };

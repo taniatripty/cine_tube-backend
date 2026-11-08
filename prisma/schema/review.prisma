@@ -13,24 +13,18 @@ model Review {
   moderatedById  String?
   moderatedAt    DateTime?
   moderationNote String?
-    tags     Tag[]
-    reviewLikes ReviewLike[]
-user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  media Media @relation(fields: [mediaId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  @@index([userId])
-  @@index([mediaId])
-  @@map("review")
-
- 
-  
-  
-
- 
+  tags           Tag[]
+  reviewLikes    ReviewLike[]
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  media          Media        @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
 
   @@unique([userId, mediaId])
+  @@index([userId])
+  @@index([mediaId])
   @@index([mediaId, status])
   @@index([status, createdAt])
   @@index([rating])
+  @@map("review")
 }

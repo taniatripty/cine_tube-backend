@@ -13,6 +13,7 @@ export const auth = betterAuth({
     emailAndPassword: {
         enabled: true,
     },
+    
     user:{
         additionalFields: {
             role: {
@@ -32,5 +33,37 @@ export const auth = betterAuth({
             }
         }
             
-    }
+    },
+
+     trustedOrigins: [process.env.BETTER_AUTH_URL || "http://localhost:5000"],
+
+  session: {
+    expiresIn: 60 * 60 * 60 * 24,
+    updateAge: 60 * 60 * 60 * 24,
+    cookieCache: {
+      enabled: true,
+      maxAge: 60 * 60 * 60 * 24,
+    },
+  },
+  advanced: {
+    useSecureCookies: false,
+    cookies: {
+      state: {
+        attributes: {
+          sameSite: "none",
+          secure: true,
+          httpOnly: true,
+          path: "/",
+        },
+      },
+      sessionToken: {
+        attributes: {
+          sameSite: "none",
+          secure: true,
+          httpOnly: true,
+          path: "/",
+        },
+      },
+    },
+  }
 });

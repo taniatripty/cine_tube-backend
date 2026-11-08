@@ -20,8 +20,8 @@ model Media {
   genres              Genre[]
   mediaAvailabilities MediaAvailability[]
   credits             MediaCredit[]
-  seasons            Season[]
-  watchLists           WatchList[]
+  seasons             Season[]
+  watchLists          WatchList[]
   reviews             Review[]
   status              MediaStatus         @default(DRAFT)
   createdAt           DateTime            @default(now())

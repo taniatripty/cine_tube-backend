@@ -1,6 +1,6 @@
 model Episode {
-  id            String @id @default(uuid())
-  seasonId      String
+  id       String @id @default(uuid())
+  seasonId String
 
   episodeNumber Int
   title         String
@@ -10,7 +10,7 @@ model Episode {
   thumbnail String?
   videoUrl  String?
 
- season Season @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  season Season @relation(fields: [seasonId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

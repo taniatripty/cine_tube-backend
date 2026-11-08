@@ -2,6 +2,11 @@ import { auth } from "../../lib/auth";
 import { prisma } from "../../lib/prisma";
 import { IRequest } from "../../interface/requestUser.interface";
 import { tokenUtils } from "../../utils/token";
+import AppError from "../../errorHandler/AppError";
+import status from "http-status";
+import { jwtutils } from "../../utils/jwt";
+import { envVars } from "../../config/env";
+import { JwtPayload } from "jsonwebtoken";
 
 type RegisterUserPayload = {
   name: string;
@@ -130,9 +135,69 @@ const getMe = async (user: IRequest) => {
   return existingUser;
 };
 
+const getnewRefreshToken=async(refreshToken:string,sessionToken:string)=>{
+  const sessionTokenExists= await prisma.session.findFirst({
+    where:{
+      token:sessionToken
+    },
+    include:{
+      user:true
+    }
+  })
+  if(!sessionTokenExists){
+    throw new AppError(status.NOT_FOUND,`user is not exists`)
+  }
+
+  
+  const varifyRefreshToken= jwtutils.verifyToken(refreshToken,envVars.REFRESH_TOKEN_SECRET)
+  if(!varifyRefreshToken.success && varifyRefreshToken.error){
+    throw new AppError(status.BAD_REQUEST,`invalid refresh token`)
+  }
+ const data=  varifyRefreshToken.data as JwtPayload
+   const newaccessToken =tokenUtils.getAccessToken({
+        userId: data.userId,
+        role: data.role,
+        name: data.name,
+        email: data.email,
+        status: data.status,
+      
+    });
+
+    const newrefreshToken = tokenUtils.getRefreshToken({
+        userId: data.userId,
+        role: data.role,
+        name: data.name,
+        email: data.email,
+        status: data.status,
+        
+     
+    });
+
+    const {token}=await prisma.session.update({
+      where:{
+        token:sessionToken
+      },
+       data : {
+            token : sessionToken,
+            expiresAt: new Date(Date.now() +   60 * 60 * 24 * 1000),
+            updatedAt: new Date(),
+        }
+
+        
+    })
+
+     return {
+        accessToken :newaccessToken,
+        refreshToken :newrefreshToken,
+        sessionToken : token
+    }
+
+}
+
 export const authService = {
   registerUser,
   loginUser,
   getAllUsers,
   getMe,
+  getnewRefreshToken
 };

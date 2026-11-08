@@ -32,32 +32,28 @@ const loadEnvVariables = (): EnvConfig => {
   ] as const;
 
   for (const name of requiredVariables) {
-    if (!process.env[name]) {
+    const envName = name.trim();
+    if (!process.env[envName]?.trim()) {
       throw new Error(
-        `Environment variable ${name} is required but is not set.`,
+        `Environment variable ${envName} is required but is not set.`,
       );
     }
   }
 
-  const get = (name: (typeof requiredVariables)[number]): string =>
-    process.env[name]!;
-
+ 
   return {
-    NODE_ENV: get("NODE_ENV"),
-    PORT: get("PORT"),
-    DATABASE_URL: get("DATABASE_URL"),
-    BETTER_AUTH_SECRET: get("BETTER_AUTH_SECRET"),
-    BETTER_AUTH_URL: get("BETTER_AUTH_URL"),
-    ACCESS_TOKEN_SECRET: get("ACCESS_TOKEN_SECRET"),
-    REFRESH_TOKEN_SECRET: get("REFRESH_TOKEN_SECRET"),
-    ACCESS_TOKEN_EXPIRESIN: get("ACCESS_TOKEN_EXPIRESIN"),
-    REFRESH_TOKEN_EXPIRESIN: get("REFRESH_TOKEN_EXPIRESIN"),
-    BETTER_AUTH_SESSION_TOKEN_EXPIESIN: get(
-      "BETTER_AUTH_SESSION_TOKEN_EXPIESIN",
-    ),
-    BETTER_AUTH_SESSION_TOKEN_UPDATE_AGE: get(
-      "BETTER_AUTH_SESSION_TOKEN_UPDATE_AGE",
-    ),
+    NODE_ENV: process.env.NODE_ENV  as string,
+    PORT: process.env.PORT  as string,
+    DATABASE_URL: process.env.DATABASE_URL  as string,
+    BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET  as string,
+    BETTER_AUTH_URL: process.env.BETTER_AUTH_URL  as string,
+    ACCESS_TOKEN_SECRET:  process.env.ACCESS_TOKEN_SECRET  as string,
+    REFRESH_TOKEN_SECRET: process.env.REFRESH_TOKEN_SECRET  as string,
+    ACCESS_TOKEN_EXPIRESIN: process.env.ACCESS_TOKEN_EXPIRESIN as string,
+    REFRESH_TOKEN_EXPIRESIN: process.env.REFRESH_TOKEN_EXPIRESIN  as string,
+    BETTER_AUTH_SESSION_TOKEN_EXPIESIN: process.env.BETTER_AUTH_SESSION_TOKEN_EXPIESIN  as string,
+    BETTER_AUTH_SESSION_TOKEN_UPDATE_AGE: process.env.BETTER_AUTH_SESSION_TOKEN_UPDATE_AGE  as string,
+    
   };
 };
 

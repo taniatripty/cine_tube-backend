@@ -1,11 +1,12 @@
 model Season {
-  id           String @id @default(uuid())
+  id           String  @id @default(uuid())
   mediaId      String
   seasonNumber Int
   title        String?
 
- media Media @relation(fields: [mediaId], references: [id], onDelete: Cascade)
-episodes Episode[]
+  media    Media     @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+  episodes Episode[]
+
   @@unique([mediaId, seasonNumber])
   @@index([mediaId])
   @@map("season")

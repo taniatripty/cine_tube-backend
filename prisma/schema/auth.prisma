@@ -1,19 +1,20 @@
 model User {
-  id            String    @id
-  name          String
-  email         String
-  emailVerified Boolean   @default(false)
-  image         String?
-  role          UserRole  @default(USER)
-  status        UserStatus @default(ACTIVE)
-  needpasswordChange Boolean @default(false)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  sessions      Session[]
-  accounts      Account[]
-watchList  WatchList[]
-reviews  Review[]
-reviewLikes ReviewLike[]
+  id                 String       @id
+  name               String
+  email              String
+  emailVerified      Boolean      @default(false)
+  image              String?
+  role               UserRole     @default(USER)
+  status             UserStatus   @default(ACTIVE)
+  needpasswordChange Boolean      @default(false)
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+  sessions           Session[]
+  accounts           Account[]
+  watchList          WatchList[]
+  reviews            Review[]
+  reviewLikes        ReviewLike[]
+
   @@unique([email])
   @@map("user")
 }
@@ -27,8 +28,8 @@ model Session {
   ipAddress String?
   userAgent String?
   userId    String
-  
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([token])
   @@index([userId])
