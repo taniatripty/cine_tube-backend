@@ -6,6 +6,8 @@ import { tokenUtils } from "../../utils/token";
 import AppError from "../../errorHandler/AppError";
 import status from "http-status";
 import { cookieUtils } from "../../utils/cookie";
+import { envVars } from "../../config/env";
+import { auth } from "../../lib/auth";
 
  const register = catchAsync(
   async (req: Request, res: Response) => {
@@ -142,11 +144,80 @@ const logoutUser = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const googleLogin = catchAsync(async (req: Request, res: Response) => {
+  const redirectPath = req.query.redirect as string  || "/dashboard";
+  const encodedRedirectPath = encodeURIComponent(redirectPath as string);
+  const callbackURL = `${envVars.BETTER_AUTH_URL}/api/v1/auth/google/success?redirect=${encodedRedirectPath}`;
+  res.render("googleRedirects", {
+    callbackURL: callbackURL,
+    betterAuthUrl: envVars.BETTER_AUTH_URL,
+  });
+});
+
+
+
+const googleloginSuccess = catchAsync(
+    async (req: Request, res: Response) => {
+        const redirectPath =
+            typeof req.query.redirect === "string"
+                ? req.query.redirect
+                : "/dashboard";
+
+        const sessionToken = req.cookies["better-auth.session_token"];
+
+        // No session token
+        if (!sessionToken) {
+            return res.redirect(
+                `${envVars.FRONTEND_URL}/login?error=oauth_failed`
+            );
+        }
+
+        // Get Better Auth session
+        const session = await auth.api.getSession({
+            headers: {
+                cookie: `better-auth.session_token=${sessionToken}`,
+            },
+        });
+
+        // No session/user
+        if (!session?.user) {
+            return res.redirect(
+                `${envVars.FRONTEND_URL}/login?error=no_user_found`
+            );
+        }
+
+        // Generate application JWT tokens
+        const result = await authService.googleLoginSuccess(session);
+
+        const { accessToken, refreshToken } = result;
+
+        // Set cookies
+        tokenUtils.setAccessToken(res, accessToken);
+        tokenUtils.setRefreshTokenCookie(res,refreshToken);
+
+        // Prevent open redirect
+        const isValidRedirectPath =
+            redirectPath.startsWith("/") &&
+            !redirectPath.startsWith("//");
+
+        const finalRedirectPath = isValidRedirectPath
+            ? redirectPath
+            : "/dashboard";
+
+        // Redirect frontend
+        return res.redirect(
+            `${envVars.FRONTEND_URL}${finalRedirectPath}`
+        );
+    }
+);
+
 export const authcontroller={
   register,
   login,
   getAllUsers,
   getMe,
   getnewRefreshToken,
-  logoutUser
+  logoutUser,
+  googleLogin,
+  googleloginSuccess
 };

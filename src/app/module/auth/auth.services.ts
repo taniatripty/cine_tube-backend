@@ -204,11 +204,47 @@ const logoutUser = async (sessionToken : string) => {
     return result;
 }
 
+const googleLoginSuccess=async(session:Record<string,any>)=>{
+  const isPatientExist=await prisma.user.findUnique({
+    where:{
+      id:session.user.id
+    }
+  })
+  if(!isPatientExist){
+    await prisma.user.create({
+     data:{
+       id:session.user.id,
+      name:session.user.name,
+      email:session.user.email
+     }
+    })
+  }
+  const accessToken =tokenUtils.getAccessToken({
+        userId: session.user.id,
+        role: session.user.role,
+        name: session.user.name,
+      })
+
+       const refreshToken =tokenUtils.getRefreshToken({
+        userId: session.user.id,
+        role: session.user.role,
+        name: session.user.name,
+      })
+      
+      return{
+        accessToken,
+        refreshToken
+      }
+
+}
+
+
 export const authService = {
   registerUser,
   loginUser,
   getAllUsers,
   getMe,
   getnewRefreshToken,
-  logoutUser
+  logoutUser,
+  googleLoginSuccess
 };

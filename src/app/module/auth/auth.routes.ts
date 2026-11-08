@@ -11,4 +11,6 @@ router.get("/all", checkAuth(UserRole.ADMIN, UserRole.USER), authcontroller.getA
 router.get("/me", checkAuth(UserRole.ADMIN, UserRole.USER), authcontroller.getMe);
 router.post("/refresh-token", authcontroller.getnewRefreshToken);
 router.post("/logout",checkAuth(UserRole.ADMIN,UserRole.USER), authcontroller.logoutUser);
+router.get("/login/google", authcontroller.googleLogin);
+router.get("/google/success", authcontroller.googleloginSuccess);
 export const authRoutes = router;

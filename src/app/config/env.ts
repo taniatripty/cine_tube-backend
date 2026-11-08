@@ -14,6 +14,10 @@ interface EnvConfig {
   REFRESH_TOKEN_EXPIRESIN: string;
   BETTER_AUTH_SESSION_TOKEN_EXPIESIN: string;
   BETTER_AUTH_SESSION_TOKEN_UPDATE_AGE: string;
+  FRONTEND_URL: string;
+  GOOGLE_CLIENT_ID: string;
+  GOOGLE_CLIENT_SECRET: string;
+  
 }
 
 const loadEnvVariables = (): EnvConfig => {
@@ -29,6 +33,9 @@ const loadEnvVariables = (): EnvConfig => {
     "REFRESH_TOKEN_EXPIRESIN",
     "BETTER_AUTH_SESSION_TOKEN_EXPIESIN",
     "BETTER_AUTH_SESSION_TOKEN_UPDATE_AGE",
+    "FRONTEND_URL",
+    "GOOGLE_CLIENT_ID",
+    "GOOGLE_CLIENT_SECRET",
   ] as const;
 
   for (const name of requiredVariables) {
@@ -53,6 +60,9 @@ const loadEnvVariables = (): EnvConfig => {
     REFRESH_TOKEN_EXPIRESIN: process.env.REFRESH_TOKEN_EXPIRESIN  as string,
     BETTER_AUTH_SESSION_TOKEN_EXPIESIN: process.env.BETTER_AUTH_SESSION_TOKEN_EXPIESIN  as string,
     BETTER_AUTH_SESSION_TOKEN_UPDATE_AGE: process.env.BETTER_AUTH_SESSION_TOKEN_UPDATE_AGE  as string,
+    FRONTEND_URL:process.env.FRONTEND_URL as string,
+    GOOGLE_CLIENT_ID:process.env.GoOGLE_CLIENT_ID as string,
+    GOOGLE_CLIENT_SECRET:process.env.GOOGLE_CLIENT_SECRET as string,
     
   };
 };

@@ -3,6 +3,7 @@ import { prismaAdapter } from "better-auth/adapters/prisma";
 import { prisma } from "./prisma";
 import { UserRole, UserStatus } from "../../generated/prisma/enums"; 
 import { bearer } from "better-auth/plugins";
+import { envVars } from "../config/env";
 
 
 export const auth = betterAuth({
@@ -14,6 +15,21 @@ export const auth = betterAuth({
     emailAndPassword: {
         enabled: true,
     },
+     socialProviders: {
+    google: {
+      clientId: envVars.GOOGLE_CLIENT_ID,
+      clientSecret: envVars.GOOGLE_CLIENT_SECRET,
+      mapProfileToUser: () => {
+        return {
+          role: UserRole.USER,
+          status: UserStatus.ACTIVE,
+          emailVerified: true,
+          needPasswordChange: false,
+          isDeleted: false,
+        };
+      },
+    },
+  },
     
     user:{
         additionalFields: {
