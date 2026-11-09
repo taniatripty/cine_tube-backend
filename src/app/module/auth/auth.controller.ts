@@ -116,6 +116,18 @@ const getnewRefreshToken = async (req: Request, res: Response) => {
   });
 };
 
+const forgetpassword = catchAsync(async (req: Request, res: Response) => {
+  const { email } = req.body;
+  await authService.forgetPassword(email);
+
+  sendResponse({
+    res,
+    statusCode: status.OK,
+    success: true,
+    message: " forget password successfully",
+  });
+});
+
 const logoutUser = catchAsync(async (req: Request, res: Response) => {
   const betterAuthSessionToken = req.cookies["better-auth.session_token"];
   const result = await authService.logoutUser(betterAuthSessionToken);
@@ -217,6 +229,7 @@ export const authcontroller={
   getAllUsers,
   getMe,
   getnewRefreshToken,
+  forgetpassword,
   logoutUser,
   googleLogin,
   googleloginSuccess
