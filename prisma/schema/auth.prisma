@@ -9,6 +9,7 @@ model User {
   needpasswordChange Boolean      @default(false)
   createdAt          DateTime     @default(now())
   updatedAt          DateTime     @updatedAt
+  admin              Admin?       
   sessions           Session[]
   accounts           Account[]
   watchList          WatchList[]
