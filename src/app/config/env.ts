@@ -22,6 +22,8 @@ interface EnvConfig {
   EMAIL_SENDER_SMTP_HOST: string;
   EMAIL_SENDER_SMTP_PORT: string;
   EMAIL_SENDER_SMTP_FROM: string;
+  ADMIN_EMAIL: string;
+  ADMIN_PASSWORD: string;
   
 }
 
@@ -46,6 +48,8 @@ const loadEnvVariables = (): EnvConfig => {
     "EMAIL_SENDER_SMTP_HOST",
     "EMAIL_SENDER_SMTP_PORT",
     "EMAIL_SENDER_SMTP_FROM",
+    "ADMIN_EMAIL",
+    "ADMIN_PASSWORD",
   ] as const;
 
   for (const name of requiredVariables) {
@@ -78,6 +82,8 @@ const loadEnvVariables = (): EnvConfig => {
     EMAIL_SENDER_SMTP_HOST: process.env.EMAIL_SENDER_SMTP_HOST as string,
     EMAIL_SENDER_SMTP_PORT: process.env.EMAIL_SENDER_SMTP_PORT as string,
     EMAIL_SENDER_SMTP_FROM: process.env.EMAIL_SENDER_SMTP_FROM as string,
+    ADMIN_EMAIL: process.env.ADMIN_EMAIL as string,
+    ADMIN_PASSWORD: process.env.ADMIN_PASSWORD as string,
   };
 };
 
