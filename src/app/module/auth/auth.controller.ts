@@ -128,6 +128,20 @@ const forgetpassword = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+
+const resetpassword = catchAsync(async (req: Request, res: Response) => {
+  const { email, otp, newPassword } = req.body;
+  await authService.resetPassword(email, otp, newPassword);
+
+  sendResponse({
+    res,
+    statusCode: status.OK,
+    success: true,
+    message: " reset password successfully",
+  });
+});
+
+
 const logoutUser = catchAsync(async (req: Request, res: Response) => {
   const betterAuthSessionToken = req.cookies["better-auth.session_token"];
   const result = await authService.logoutUser(betterAuthSessionToken);
@@ -230,6 +244,7 @@ export const authcontroller={
   getMe,
   getnewRefreshToken,
   forgetpassword,
+  resetpassword,
   logoutUser,
   googleLogin,
   googleloginSuccess

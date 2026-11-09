@@ -217,6 +217,47 @@ const forgetPassword=async(email:string)=>{
     })
 }
 
+const resetPassword=async(email:string,otp:string,newPassword:string)=>{
+  const isExistsuser=await prisma.user.findUnique({
+    where:{
+      email
+    }
+  })
+  if(!isExistsuser){
+    throw new AppError(status.NOT_FOUND,"user is not found")
+
+  }
+    if(!isExistsuser.emailVerified){
+        throw new AppError( status.BAD_REQUEST,"Email not verified");
+    }
+
+   
+
+    await auth.api.resetPasswordEmailOTP({
+      body:{
+        email,
+        otp,
+        password:newPassword
+      }
+    })
+    if (isExistsuser.needpasswordChange) {
+        await prisma.user.update({
+            where: {
+                id: isExistsuser.id,
+            },
+            data: {
+                needPasswordChange: false,
+            }
+        })
+    }
+
+    await prisma.session.deleteMany({
+        where:{
+            userId :isExistsuser.id,
+        }
+    })
+}
+
 
 const logoutUser = async (sessionToken : string) => {
     const result = await auth.api.signOut({
@@ -270,6 +311,7 @@ export const authService = {
   getMe,
   getnewRefreshToken,
   forgetPassword,
+  resetPassword,
   logoutUser,
   googleLoginSuccess
 };
