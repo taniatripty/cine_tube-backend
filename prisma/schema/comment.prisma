@@ -1,5 +1,5 @@
 model Comment {
-  id       String @id @default(cuid())
+  id       String  @id @default(cuid())
   userId   String
   reviewId String
   parentId String?
@@ -11,22 +11,22 @@ model Comment {
   moderatedById String?
   moderatedAt   DateTime?
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
   commentLikes CommentLike[]
-  
-user User @relation(fields: [userId] ,references: [id] , onDelete: Cascade)
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   review Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
 
-parent Comment? @relation("CommentReplies" , fields: [parentId] , references: [ id] , onDelete: Cascade)
-    replies Comment[] @relation("CommentReplies")
-//       moderatedBy User? @relation(
-//     "CommentModerator",
-//     fields: [moderatedById],
-//     references: [id]
-//   )
+  parent  Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies Comment[] @relation("CommentReplies")
+  //       moderatedBy User? @relation(
+  //     "CommentModerator",
+  //     fields: [moderatedById],
+  //     references: [id]
+  //   )
 
-moderatedBy User ? @relation("CommentModerator",fields: [moderatedById],references: [id])
+  moderatedBy User? @relation("CommentModerator", fields: [moderatedById], references: [id])
 
   @@index([reviewId, status])
   @@index([parentId])

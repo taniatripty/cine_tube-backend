@@ -42,16 +42,25 @@ enum CommentStatus {
   HIDDEN
 }
 
+
+
+enum SubscriptionStatus {
+  INCOMPLETE
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  UNPAID
+  TRIALING
+}
+
 enum PaymentStatus {
   PENDING
-  SUCCESS
+  SUCCEEDED
   FAILED
   REFUNDED
 }
 
-enum SubscriptionStatus {
-  ACTIVE
-  CANCELLED
-  EXPIRED
-  PAST_DUE
+enum AccessType {
+  PURCHASE
+  RENT
 }
