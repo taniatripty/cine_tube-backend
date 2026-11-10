@@ -1,4 +1,4 @@
 import { z } from "zod";
-import { createMovieValidation } from "./media.validation";
+import { createMediaValidation } from "./media.validation";
 
-export type TCreateMovieInput = z.infer<typeof createMovieValidation>;
+export type TCreateMediaInput = z.infer<typeof createMediaValidation>;

@@ -3,7 +3,7 @@ import { UserRole } from "../../../generated/prisma/enums";
 import { checkAuth } from "../../middleware/checkAuth";
 import { validateRequest } from "../../middleware/validateRequest";
 import { mediaController } from "./media.controller";
-import { createMovieValidation } from "./media.validation";
+import { createMediaValidation } from "./media.validation";
 
 const router = Router();
 
@@ -18,10 +18,10 @@ router.get(
   mediaController.getMediaById,
 );
 router.post(
-  "/movie",
-  checkAuth(UserRole.ADMIN,UserRole.USER),
-  validateRequest(createMovieValidation),
-  mediaController.createMovie,
+  "/",
+  checkAuth(UserRole.ADMIN, UserRole.USER),
+  validateRequest(createMediaValidation),
+  mediaController.createMedia,
 );
 
 export const mediaRoutes = router;

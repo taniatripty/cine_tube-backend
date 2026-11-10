@@ -1,14 +1,12 @@
-import { MediaType } from "../../../generated/prisma/enums";
 import { prisma } from "../../lib/prisma";
-import { TCreateMovieInput } from "./media.interface";
+import { TCreateMediaInput } from "./media.interface";
 
-const createMovie = async (payload: TCreateMovieInput) => {
-  const { genreIds, ...movieData } = payload;
+const createMedia = async (payload: TCreateMediaInput) => {
+  const { genreIds, ...mediaData } = payload;
 
   return prisma.media.create({
     data: {
-      ...movieData,
-      type: MediaType.MOVIE,
+      ...mediaData,
       ...(genreIds?.length
         ? { genres: { connect: genreIds.map((id) => ({ id })) } }
         : {}),
@@ -45,7 +43,7 @@ const getMediaById = async (id: string) => {
 };
 
 export const mediaService = {
-  createMovie,
+  createMedia,
   getAllMedia,
   getMediaById,
 };

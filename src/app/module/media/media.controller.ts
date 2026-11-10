@@ -3,15 +3,15 @@ import catchAsync from "../../shared/catchAsync";
 import sendResponse from "../../shared/sendResponse";
 import { mediaService } from "./media.services";
 
-const createMovie = catchAsync(
+const createMedia = catchAsync(
   async (req: Request, res: Response) => {
-    const data = await mediaService.createMovie(req.body);
+    const data = await mediaService.createMedia(req.body);
 
     sendResponse({
       res,
       statusCode: 201,
       success: true,
-      message: "Movie created successfully.",
+      message: "Media created successfully.",
       data,
     });
   },
@@ -53,7 +53,7 @@ const getMediaById = catchAsync(async (req: Request, res: Response) => {
 });
 
 export const mediaController = {
-  createMovie,
+  createMedia,
   getAllMedia,
   getMediaById,
 };
