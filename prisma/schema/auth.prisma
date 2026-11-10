@@ -15,7 +15,9 @@ model User {
   watchList          WatchList[]
   reviews            Review[]
   reviewLikes        ReviewLike[]
-
+  comments Comment[]
+ commentLikes CommentLike[]
+ moderatedComments Comment[] @relation("CommentModerator")
   @@unique([email])
   @@map("user")
 }
