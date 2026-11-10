@@ -9,4 +9,5 @@ model ReviewLike {
 
   @@id([userId, reviewId])
   @@index([reviewId])
+  @@map("reviewLike")
 }

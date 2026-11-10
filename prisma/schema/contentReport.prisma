@@ -1,0 +1,34 @@
+model ContentReport {
+  id String @id @default(cuid())
+
+  reporterId String
+
+  targetType ReportTargetType
+
+  reviewId  String?
+  commentId String?
+
+  reason      String
+  description String?
+
+  status ReportStatus @default(PENDING)
+
+  resolvedBy String?
+  resolvedAt DateTime?
+
+  reporter User @relation("ReportRepoter", fields: [reporterId], references: [id], onDelete: Cascade)
+
+  resolver User?   @relation("ReportResolver", fields: [resolvedBy], references: [id], onDelete: SetNull)
+  review   Review? @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  comment Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([reporterId])
+  @@index([status])
+  @@index([reviewId])
+  @@index([commentId])
+  @@map("contentReports")
+}

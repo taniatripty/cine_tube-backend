@@ -5,4 +5,7 @@ model Tag {
   reviews Review[]
 
   createdAt DateTime @default(now())
+
+  @@index([name])
+  @@map("tag")
 }

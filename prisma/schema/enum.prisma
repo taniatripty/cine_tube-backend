@@ -42,8 +42,6 @@ enum CommentStatus {
   HIDDEN
 }
 
-
-
 enum SubscriptionStatus {
   INCOMPLETE
   ACTIVE
@@ -63,4 +61,16 @@ enum PaymentStatus {
 enum AccessType {
   PURCHASE
   RENT
+}
+
+enum ReportTargetType {
+  REVIEW
+  COMMENT
+}
+
+enum ReportStatus {
+  PENDING
+  REVIEWED
+  RESOLVED
+  REJECTED
 }

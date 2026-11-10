@@ -1,18 +1,16 @@
 model Subscription {
   id String @id @default(cuid())
 
-  userId String
+  userId               String
   stripeSubscriptionId String @unique
-  stripePriceId String
+  stripePriceId        String
 
-  status SubscriptionStatus @default(INCOMPLETE)
-payment Payment[]
+  status             SubscriptionStatus @default(INCOMPLETE)
+  payment            Payment[]
   currentPeriodStart DateTime?
-  currentPeriodEnd DateTime?
-  cancelAtPeriodEnd Boolean @default(false)
-  canceledAt DateTime?
-
- 
+  currentPeriodEnd   DateTime?
+  cancelAtPeriodEnd  Boolean            @default(false)
+  canceledAt         DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

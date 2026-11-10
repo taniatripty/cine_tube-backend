@@ -16,10 +16,13 @@ model Review {
   tags           Tag[]
   comments       Comment[]
   reviewLikes    ReviewLike[]
-  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  media          Media        @relation(fields: [mediaId], references: [id], onDelete: Cascade)
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  reports        ContentReport[]
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  media          Media           @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+
+  moderator User?    @relation("ReviewModerator", fields: [moderatedById], references: [id], onDelete: SetNull)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([userId, mediaId])
   @@index([userId])

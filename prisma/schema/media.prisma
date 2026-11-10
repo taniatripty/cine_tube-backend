@@ -23,7 +23,7 @@ model Media {
   seasons             Season[]
   watchLists          WatchList[]
   reviews             Review[]
-  mediaAccess MediaAccess[]
+  mediaAccess         MediaAccess[]
   status              MediaStatus         @default(DRAFT)
   createdAt           DateTime            @default(now())
   updatedAt           DateTime            @updatedAt

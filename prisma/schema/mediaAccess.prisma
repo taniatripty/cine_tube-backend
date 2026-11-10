@@ -1,8 +1,8 @@
 model MediaAccess {
   id String @id @default(cuid())
 
-  userId String
-  mediaId String
+  userId    String
+  mediaId   String
   paymentId String @unique
 
   type AccessType
@@ -13,13 +13,13 @@ model MediaAccess {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  media Media @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  media   Media   @relation(fields: [mediaId], references: [id], onDelete: Cascade)
   payment Payment @relation(fields: [paymentId], references: [id], onDelete: Cascade)
 
   @@unique([userId, mediaId])
   @@index([userId])
   @@index([mediaId])
   @@index([expiresAt])
-  @@map("media_access")
+  @@map("mediaAccess")
 }

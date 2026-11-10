@@ -1,14 +1,14 @@
 model User {
-  id                 String        @id
+  id                 String          @id
   name               String
   email              String
-  emailVerified      Boolean       @default(false)
+  emailVerified      Boolean         @default(false)
   image              String?
-  role               UserRole      @default(USER)
-  status             UserStatus    @default(ACTIVE)
-  needpasswordChange Boolean       @default(false)
-  createdAt          DateTime      @default(now())
-  updatedAt          DateTime      @updatedAt
+  role               UserRole        @default(USER)
+  status             UserStatus      @default(ACTIVE)
+  needpasswordChange Boolean         @default(false)
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
   admin              Admin?
   sessions           Session[]
   accounts           Account[]
@@ -17,10 +17,14 @@ model User {
   reviewLikes        ReviewLike[]
   comments           Comment[]
   commentLikes       CommentLike[]
-  moderatedComments  Comment[]     @relation("CommentModerator")
-subscription Subscription[]
-payment Payment[]
-mediaAccess MediaAccess[]
+  moderatedComments  Comment[]       @relation("CommentModerator")
+  reportsCreated     ContentReport[] @relation("ReportRepoter")
+  ReportsResolve     ContentReport[] @relation("ReportResolver")
+  subscription       Subscription[]
+  moderatedReviews   Review[]        @relation("ReviewModerator")
+  payment            Payment[]
+  mediaAccess        MediaAccess[]
+
   @@unique([email])
   @@map("user")
 }
