@@ -9,7 +9,7 @@ const router = Router();
 
 router.post(
   "/",
-  checkAuth(UserRole.ADMIN, UserRole.USER),
+  checkAuth(UserRole.ADMIN),
   validateRequest(createPersonValidation),
   personController.createPerson,
 );

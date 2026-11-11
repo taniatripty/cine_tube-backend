@@ -14,7 +14,7 @@ router.get(
 );
 router.post(
   "/",
-  checkAuth(UserRole.ADMIN,UserRole.USER),
+  checkAuth(UserRole.ADMIN),
   validateRequest(createGenreValidation),
   genreController.createGenre,
 );

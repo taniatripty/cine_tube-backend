@@ -88,9 +88,7 @@ export const checkAuth =
       req.user={
         userId:user.id,
         role:user.role,
-        email:user.email,
-        name:user.name,
-        image:user.image
+        email:user.email
       }
 
       // ==============================

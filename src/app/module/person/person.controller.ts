@@ -4,7 +4,7 @@ import sendResponse from "../../shared/sendResponse";
 import { personService } from "./person.services";
 
 const createPerson = catchAsync(async (req: Request, res: Response) => {
-  const data = await personService.createPerson(req.body, req.user);
+  const data = await personService.createPerson(req.body);
 
   sendResponse({
     res,
