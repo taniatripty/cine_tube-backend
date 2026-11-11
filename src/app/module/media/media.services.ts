@@ -95,6 +95,8 @@ const getAllMedia = async () => {
     },
     include: {
       genres: true,
+      credits:{ include: { person: true } },
+       mediaAvailabilities: { include: { Platform: true } },
     },
     orderBy: {
       createdAt: "desc",
