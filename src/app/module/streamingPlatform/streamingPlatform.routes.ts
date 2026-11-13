@@ -7,6 +7,11 @@ import { createStreamingPlatformValidation } from "./streamingPlatform.validatio
 
 const router = Router();
 
+router.get(
+  "/all",
+  checkAuth(UserRole.ADMIN, UserRole.USER),
+  streamingPlatformController.getAllStreamingPlatforms,
+);
 router.post(
   "/",
   checkAuth(UserRole.ADMIN),

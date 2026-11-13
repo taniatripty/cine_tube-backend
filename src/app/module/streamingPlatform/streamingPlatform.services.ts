@@ -9,6 +9,15 @@ const createStreamingPlatform = async (
   });
 };
 
+const getAllStreamingPlatforms = async () => {
+  return prisma.streamingPlatform.findMany({
+    orderBy: {
+      name: "asc",
+    },
+  });
+};
+
 export const streamingPlatformService = {
   createStreamingPlatform,
+  getAllStreamingPlatforms,
 };

@@ -15,6 +15,19 @@ const createPerson = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const getAllPeople = catchAsync(async (_req: Request, res: Response) => {
+  const data = await personService.getAllPeople();
+
+  sendResponse({
+    res,
+    statusCode: 200,
+    success: true,
+    message: "People retrieved successfully.",
+    data,
+  });
+});
+
 export const personController = {
   createPerson,
+  getAllPeople,
 };

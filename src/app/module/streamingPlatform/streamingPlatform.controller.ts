@@ -19,6 +19,21 @@ const createStreamingPlatform = catchAsync(
   },
 );
 
+const getAllStreamingPlatforms = catchAsync(
+  async (_req: Request, res: Response) => {
+    const data = await streamingPlatformService.getAllStreamingPlatforms();
+
+    sendResponse({
+      res,
+      statusCode: 200,
+      success: true,
+      message: "Streaming platforms retrieved successfully.",
+      data,
+    });
+  },
+);
+
 export const streamingPlatformController = {
   createStreamingPlatform,
+  getAllStreamingPlatforms,
 };

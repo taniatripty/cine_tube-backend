@@ -7,6 +7,18 @@ const createPerson = async (payload: TCreatePersonInput) => {
   });
 };
 
+const getAllPeople = async () => {
+  return prisma.person.findMany({
+    where: {
+      isDeleted: false,
+    },
+    orderBy: {
+      name: "asc",
+    },
+  });
+};
+
 export const personService = {
   createPerson,
+  getAllPeople,
 };

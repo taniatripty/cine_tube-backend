@@ -7,6 +7,11 @@ import { createPersonValidation } from "./person.validation";
 
 const router = Router();
 
+router.get(
+  "/all",
+  checkAuth(UserRole.ADMIN, UserRole.USER),
+  personController.getAllPeople,
+);
 router.post(
   "/",
   checkAuth(UserRole.ADMIN),
