@@ -115,7 +115,7 @@ const getMe = async (user: IRequest) => {
       id: user.userId,
     },
     include: {
-      wishList: {
+      watchList: {
         include: {
           media: true,
         },

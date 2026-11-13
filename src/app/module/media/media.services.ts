@@ -113,6 +113,8 @@ const getMediaById = async (id: string) => {
     },
     include: {
       genres: true,
+      credits:{ include: { person: true } },
+       mediaAvailabilities: { include: { Platform: true } },
     },
   });
   return result;
