@@ -23,7 +23,6 @@ app.set(
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use("/api/v1", indexRoutes);
 
 app.use(
   cors({
@@ -50,6 +49,9 @@ app.use(
     ],
   }),
 );
+
+app.use("/api/v1", indexRoutes);
+
 
 app.use(
   "/api/auth",

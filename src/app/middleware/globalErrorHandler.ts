@@ -12,6 +12,7 @@ import {
   handlerPrismaClientRustPanicError,
 } from "../errorHandler/handlerPrismaError";
 import { handleZodError } from "../errorHandler/handlerZodError";
+import { deleteUploadedFilesFromGlobalErrorHandler } from "../utils/deleteUploadFileFromGlobalError";
 
 const getErrorResponse = (error: unknown): TErrorResponse => {
   if (error instanceof AppError) {
@@ -65,12 +66,13 @@ const getErrorResponse = (error: unknown): TErrorResponse => {
   };
 };
 
-export const globalErrorHandler: ErrorRequestHandler = (
+export const globalErrorHandler: ErrorRequestHandler = async (
   error: unknown,
-  _req,
+  req,
   res,
   _next,
 ) => {
+  await deleteUploadedFilesFromGlobalErrorHandler(req);
   const errorResponse = getErrorResponse(error);
   const statusCode = errorResponse.statusCode ?? status.INTERNAL_SERVER_ERROR;
 

@@ -5,7 +5,15 @@ import { mediaService } from "./media.services";
 
 const createMedia = catchAsync(
   async (req: Request, res: Response) => {
-    const data = await mediaService.createMedia(req.body);
+    const files = req.files;
+    const fileFields = files && !Array.isArray(files) ? files : {};
+    const payload = {
+      ...req.body,
+      poster: fileFields.poster?.[0]?.path ?? req.body.poster,
+      backdrop: fileFields.backdrop?.[0]?.path ?? req.body.backdrop,
+    };
+
+    const data = await mediaService.createMedia(payload);
 
     sendResponse({
       res,

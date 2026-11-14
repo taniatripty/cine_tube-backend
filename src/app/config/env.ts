@@ -91,7 +91,7 @@ const loadEnvVariables = (): EnvConfig => {
     ADMIN_EMAIL: process.env.ADMIN_EMAIL as string,
     ADMIN_PASSWORD: process.env.ADMIN_PASSWORD as string,
     CLOUDINARY_CLOUD_NAME:process.env.CLOUDINARY_CLOUD_NAME as string,
-    CLOUDINARY_API_KEY:process.env.CLOUDINARY_CLOUD_NAME as string,
+    CLOUDINARY_API_KEY:process.env.CLOUDINARY_API_KEY as string,
     CLOUDINARY_API_SECRET:process.env.CLOUDINARY_API_SECRET as string
   };
 };
