@@ -9,7 +9,7 @@ const mediaCreditValidation = z.object({
   personId: z.string().trim().min(1),
   role: z.enum(CreditRole),
   characterName: z.string().trim().nullable().optional(),
-  displayOrder: z.number().int().nonnegative().default(0),
+  //displayOrder: z.number().int().nonnegative().default(0),
 });
 
 const mediaAvailabilityValidation = z
@@ -33,6 +33,14 @@ const mediaAvailabilityValidation = z
       path: ["availableUntil"],
     },
   );
+const multipartBoolean = z.preprocess(
+  (value) => {
+    if (value === "true") return true;
+    if (value === "false") return false;
+    return value;
+  },
+  z.boolean(),
+);
 
 export const createMediaValidation = z
   .object({
@@ -42,10 +50,16 @@ export const createMediaValidation = z
     backdrop: z.string().trim().nullable().optional(),
     type: z.enum(MediaType),
     releaseDate: z.coerce.date().nullable().optional(),
-    releaseYear: z.number().int().nullable().optional(),
-    runtime: z.number().int().positive().nullable().optional(),
-    isPremium: z.boolean().optional(),
-    price: z.number().nonnegative().nullable().optional(),
+   // releaseYear: z.number().int().nullable().optional(),
+     //runtime: z.number().int().positive().nullable().optional(),
+  isPremium: multipartBoolean.optional(),
+   // price: z.number().nonnegative().nullable().optional(),
+
+   // displayOrder: z.coerce.number().int().nonnegative().default(0),
+
+releaseYear: z.coerce.number().int().nullable().optional(),
+runtime: z.coerce.number().int().positive().nullable().optional(),
+price: z.coerce.number().nonnegative().nullable().optional(),
     status: z.enum(MediaStatus).optional(),
     genreIds: z.array(z.string().trim().min(1)).optional(),
     credits: z.array(mediaCreditValidation).optional(),
@@ -85,3 +99,6 @@ export const createMediaValidation = z
       });
     }
   });
+
+
+  
