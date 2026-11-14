@@ -24,6 +24,9 @@ interface EnvConfig {
   EMAIL_SENDER_SMTP_FROM: string;
   ADMIN_EMAIL: string;
   ADMIN_PASSWORD: string;
+  CLOUDINARY_CLOUD_NAME:string;
+  CLOUDINARY_API_KEY:string;
+  CLOUDINARY_API_SECRET:string;
   
 }
 
@@ -50,6 +53,9 @@ const loadEnvVariables = (): EnvConfig => {
     "EMAIL_SENDER_SMTP_FROM",
     "ADMIN_EMAIL",
     "ADMIN_PASSWORD",
+    "CLOUDINARY_CLOUD_NAME",
+    "CLOUDINARY_API_KEY",
+    "CLOUDINARY_API_SECRET"
   ] as const;
 
   for (const name of requiredVariables) {
@@ -84,6 +90,9 @@ const loadEnvVariables = (): EnvConfig => {
     EMAIL_SENDER_SMTP_FROM: process.env.EMAIL_SENDER_SMTP_FROM as string,
     ADMIN_EMAIL: process.env.ADMIN_EMAIL as string,
     ADMIN_PASSWORD: process.env.ADMIN_PASSWORD as string,
+    CLOUDINARY_CLOUD_NAME:process.env.CLOUDINARY_CLOUD_NAME as string,
+    CLOUDINARY_API_KEY:process.env.CLOUDINARY_CLOUD_NAME as string,
+    CLOUDINARY_API_SECRET:process.env.CLOUDINARY_API_SECRET as string
   };
 };
 
