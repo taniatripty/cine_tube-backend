@@ -5,9 +5,11 @@ import { streamingPlatformService } from "./streamingPlatform.services";
 
 const createStreamingPlatform = catchAsync(
   async (req: Request, res: Response) => {
-    const data = await streamingPlatformService.createStreamingPlatform(
-      req.body,
-    );
+    const payload={
+      ...req.body,
+      logo:req.file?.path
+    }
+    const data = await streamingPlatformService.createStreamingPlatform(payload);
 
     sendResponse({
       res,

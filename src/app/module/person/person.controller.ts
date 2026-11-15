@@ -4,7 +4,10 @@ import sendResponse from "../../shared/sendResponse";
 import { personService } from "./person.services";
 
 const createPerson = catchAsync(async (req: Request, res: Response) => {
-  const data = await personService.createPerson(req.body);
+  const payload={...req.body,
+    photo:req.file?.path
+  }
+  const data = await personService.createPerson(payload);
 
   sendResponse({
     res,

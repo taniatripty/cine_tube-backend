@@ -4,6 +4,7 @@ import { checkAuth } from "../../middleware/checkAuth";
 import { validateRequest } from "../../middleware/validateRequest";
 import { streamingPlatformController } from "./streamingPlatform.controller";
 import { createStreamingPlatformValidation } from "./streamingPlatform.validation";
+import { multerUpload } from "../../config/multer.confing";
 
 const router = Router();
 
@@ -14,6 +15,7 @@ router.get(
 );
 router.post(
   "/",
+  multerUpload.single("file"),
   checkAuth(UserRole.ADMIN),
   validateRequest(createStreamingPlatformValidation),
   streamingPlatformController.createStreamingPlatform,
