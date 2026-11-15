@@ -11,7 +11,7 @@ model Payment {
 
   amount Decimal @db.Decimal(10, 2)
 
-  status PaymentStatus @default(PENDING)
+  status PaymentStatus @default(UNPAID)
 
   paymentGatewayData Json?
   paidAt             DateTime?

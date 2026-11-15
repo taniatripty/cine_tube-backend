@@ -8,6 +8,7 @@ import { envVars } from "./app/config/env";
 import { toNodeHandler } from "better-auth/node";
 import { auth } from "./app/lib/auth";
 import path from "node:path";
+import { PaymentController } from "./app/module/payment/payment.controller";
 
 
 const app: Application = express();
@@ -19,6 +20,11 @@ app.set(
   "views",
   path.resolve(process.cwd(), "src/app/templates"),
 );
+
+app.post(
+  "/webhook",
+  express.raw({ type: "application/json" }),PaymentController.handleStripeWebhookEvent);
+
 
 
 app.use(express.urlencoded({ extended: true }));

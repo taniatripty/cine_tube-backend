@@ -1,5 +1,6 @@
 import dotenv from "dotenv";
 
+
 dotenv.config();
 
 interface EnvConfig {
@@ -27,6 +28,9 @@ interface EnvConfig {
   CLOUDINARY_CLOUD_NAME:string;
   CLOUDINARY_API_KEY:string;
   CLOUDINARY_API_SECRET:string;
+  STRIPE_PUBLISHABLE_kEY:string;
+  STRIPE_SECRET_kEY:string;
+  STRIPE_WEBHOOK_SECRET:string;
   
 }
 
@@ -55,7 +59,11 @@ const loadEnvVariables = (): EnvConfig => {
     "ADMIN_PASSWORD",
     "CLOUDINARY_CLOUD_NAME",
     "CLOUDINARY_API_KEY",
-    "CLOUDINARY_API_SECRET"
+    "CLOUDINARY_API_SECRET",
+    "STRIPE_PUBLISHABLE_kEY",
+    "STRIPE_SECRET_kEY",
+    "STRIPE_WEBHOOK_SECRET"
+
   ] as const;
 
   for (const name of requiredVariables) {
@@ -92,7 +100,10 @@ const loadEnvVariables = (): EnvConfig => {
     ADMIN_PASSWORD: process.env.ADMIN_PASSWORD as string,
     CLOUDINARY_CLOUD_NAME:process.env.CLOUDINARY_CLOUD_NAME as string,
     CLOUDINARY_API_KEY:process.env.CLOUDINARY_API_KEY as string,
-    CLOUDINARY_API_SECRET:process.env.CLOUDINARY_API_SECRET as string
+    CLOUDINARY_API_SECRET:process.env.CLOUDINARY_API_SECRET as string,
+    STRIPE_PUBLISHABLE_kEY:process.env.STRIPE_PUBLISHABLE_kEY as string,
+    STRIPE_SECRET_kEY:process.env.STRIPE_SECRET_kEY as string,
+    STRIPE_WEBHOOK_SECRET:process.env.STRIPE_WEBHOOK_SECRET as string
   };
 };
 

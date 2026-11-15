@@ -1,0 +1,184 @@
+import Stripe from "stripe";
+import { PaymentStatus } from "../../../generated/prisma/enums";
+import { prisma } from "../../lib/prisma";
+
+type PaymentEventUpdate = {
+  event: Stripe.Event;
+  paymentId: string;
+  stripeObjectId: string;
+  status: PaymentStatus;
+  paymentIntentId?: string;
+  paidAt?: Date;
+};
+
+const findPaymentIdByIntent = async (paymentIntentId: string) => {
+  const payment = await prisma.payment.findUnique({
+    where: { stripePaymentIntentId: paymentIntentId },
+    select: { id: true },
+  });
+
+  return payment?.id;
+};
+
+const updatePaymentFromEvent = async ({
+  event,
+  paymentId,
+  stripeObjectId,
+  status,
+  paymentIntentId,
+  paidAt,
+}: PaymentEventUpdate) => {
+  const payment = await prisma.payment.findUnique({
+    where: { id: paymentId },
+    select: { id: true, stripeEventId: true },
+  });
+
+  if (!payment) {
+    throw new Error(`Payment ${paymentId} referenced by Stripe was not found`);
+  }
+
+  if (payment.stripeEventId === event.id) {
+    return { message: `Event ${event.id} was already processed` };
+  }
+
+  const where =
+    status === PaymentStatus.REFUNDED
+      ? { id: payment.id }
+      : status === PaymentStatus.PAID
+        ? { id: payment.id, status: { not: PaymentStatus.REFUNDED } }
+        : {
+            id: payment.id,
+            status: {
+              notIn: [PaymentStatus.PAID, PaymentStatus.REFUNDED],
+            },
+          };
+
+  const result = await prisma.payment.updateMany({
+    where,
+    data: {
+      status,
+      stripeEventId: event.id,
+      ...(paymentIntentId ? { stripePaymentIntentId: paymentIntentId } : {}),
+      ...(paidAt ? { paidAt } : {}),
+      paymentGatewayData: {
+        eventId: event.id,
+        eventType: event.type,
+        objectId: stripeObjectId,
+      },
+    },
+  });
+
+  if (result.count === 0) {
+    return { message: `Ignoring stale event ${event.id} for payment ${paymentId}` };
+  }
+
+  return { message: `Payment ${paymentId} updated to ${status}` };
+};
+
+const getPaymentIdForIntent = async (paymentIntent: Stripe.PaymentIntent) => {
+  const metadataPaymentId = paymentIntent.metadata.paymentId;
+  if (metadataPaymentId) {
+    return metadataPaymentId;
+  }
+
+  const paymentId = await findPaymentIdByIntent(paymentIntent.id);
+  if (!paymentId) {
+    throw new Error(
+      `No payment is linked to Stripe PaymentIntent ${paymentIntent.id}`,
+    );
+  }
+
+  return paymentId;
+};
+
+const handlerStripeWebhookEvent = async (event: Stripe.Event) => {
+  switch (event.type) {
+    case "checkout.session.completed":
+    case "checkout.session.async_payment_succeeded":
+    case "checkout.session.async_payment_failed":
+    case "checkout.session.expired": {
+      const session = event.data.object;
+      const paymentId = session.metadata?.paymentId;
+
+      if (!paymentId) {
+        throw new Error(
+          `Stripe Checkout session ${session.id} has no paymentId metadata`,
+        );
+      }
+
+      const paymentIntentId =
+        typeof session.payment_intent === "string"
+          ? session.payment_intent
+          : session.payment_intent?.id;
+      const succeeded =
+        event.type === "checkout.session.async_payment_succeeded" ||
+        (event.type === "checkout.session.completed" &&
+          (session.payment_status === "paid" ||
+            session.payment_status === "no_payment_required"));
+
+      return updatePaymentFromEvent({
+        event,
+        paymentId,
+        stripeObjectId: session.id,
+        status: succeeded ? PaymentStatus.PAID : PaymentStatus.UNPAID,
+        ...(succeeded ? { paidAt: new Date(event.created * 1000) } : {}),
+        ...(paymentIntentId ? { paymentIntentId } : {}),
+      });
+    }
+
+    case "payment_intent.succeeded":
+    case "payment_intent.payment_failed": {
+      const paymentIntent = event.data.object;
+      const paymentId = await getPaymentIdForIntent(paymentIntent);
+      const succeeded = event.type === "payment_intent.succeeded";
+
+      return updatePaymentFromEvent({
+        event,
+        paymentId,
+        stripeObjectId: paymentIntent.id,
+        paymentIntentId: paymentIntent.id,
+        status: succeeded ? PaymentStatus.PAID : PaymentStatus.UNPAID,
+        ...(succeeded ? { paidAt: new Date(event.created * 1000) } : {}),
+      });
+    }
+
+    case "charge.refunded": {
+      const charge = event.data.object;
+      if (charge.amount_refunded < charge.amount) {
+        return {
+          message: `Partial refund for charge ${charge.id} is not represented by PaymentStatus`,
+        };
+      }
+
+      const paymentIntentId =
+        typeof charge.payment_intent === "string"
+          ? charge.payment_intent
+          : charge.payment_intent?.id;
+      if (!paymentIntentId) {
+        throw new Error(`Refunded charge ${charge.id} has no PaymentIntent`);
+      }
+
+      const paymentId = await findPaymentIdByIntent(paymentIntentId);
+      if (!paymentId) {
+        throw new Error(
+          `No payment is linked to refunded PaymentIntent ${paymentIntentId}`,
+        );
+      }
+
+      return updatePaymentFromEvent({
+        event,
+        paymentId,
+        stripeObjectId: charge.id,
+        paymentIntentId,
+        status: PaymentStatus.REFUNDED,
+      });
+    }
+
+    default:
+      return { message: `Unhandled Stripe event type ${event.type}` };
+  }
+};
+
+export const PaymentService = {
+  handlerStripeWebhookEvent,
+};
