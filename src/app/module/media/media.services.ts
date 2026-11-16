@@ -2,6 +2,7 @@ import status from "http-status";
 import { prisma } from "../../lib/prisma";
 import AppError from "../../errorHandler/AppError";
 import { TCreateMediaInput } from "./media.interface";
+import { tr } from "zod/v4/locales";
 
 const createMedia = async (payload: TCreateMediaInput) => {
   const { genreIds, credits, availabilities, ...mediaData } = payload;
@@ -95,6 +96,8 @@ const getAllMedia = async () => {
     },
     include: {
       genres: true,
+      seasons:true,
+      
       credits:{ include: { person: true } },
        mediaAvailabilities: { include: { Platform: true } },
     },
