@@ -1,8 +1,7 @@
 import status from "http-status";
-import { prisma } from "../../lib/prisma";
 import AppError from "../../errorHandler/AppError";
+import { prisma } from "../../lib/prisma";
 import { TCreateMediaInput } from "./media.interface";
-import { tr } from "zod/v4/locales";
 
 const createMedia = async (payload: TCreateMediaInput) => {
   const { genreIds, credits, availabilities, ...mediaData } = payload;
@@ -90,16 +89,15 @@ const createMedia = async (payload: TCreateMediaInput) => {
 };
 
 const getAllMedia = async () => {
-  const result=prisma.media.findMany({
+  const result = prisma.media.findMany({
     where: {
       isDeleted: false,
     },
     include: {
       genres: true,
-      seasons:true,
-      
-      credits:{ include: { person: true } },
-       mediaAvailabilities: { include: { Platform: true } },
+      seasons: { include: { episodes: true } },
+      credits: { include: { person: true } },
+      mediaAvailabilities: { include: { Platform: true } },
     },
     orderBy: {
       createdAt: "desc",
@@ -109,15 +107,15 @@ const getAllMedia = async () => {
 };
 
 const getMediaById = async (id: string) => {
-  const result=prisma.media.findFirst({
+  const result = prisma.media.findFirst({
     where: {
       id,
       isDeleted: false,
     },
     include: {
       genres: true,
-      credits:{ include: { person: true } },
-       mediaAvailabilities: { include: { Platform: true } },
+      credits: { include: { person: true } },
+      mediaAvailabilities: { include: { Platform: true } },
     },
   });
   return result;
