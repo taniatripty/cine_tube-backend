@@ -59,7 +59,20 @@ enum PaymentStatus {
 
 enum AccessType {
   PURCHASE
-  RENT
+  RENT_MONTH
+  RENT_YEAR
+  SUBSCRIPTION
+}
+
+enum PaymentPurpose {
+  MEDIA_PURCHASE
+  MEDIA_RENT
+  SUBSCRIPTION
+}
+
+enum RentDuration {
+  MONTH
+  YEAR
 }
 
 enum ReportTargetType {

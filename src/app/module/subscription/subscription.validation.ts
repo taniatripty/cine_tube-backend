@@ -1,5 +1,5 @@
 import { z } from "zod";
 
-export const createSubscriptionValidation = z.object({
+export const createSubscriptionCheckoutValidation = z.object({
   stripePriceId: z.string().trim().min(1),
 });

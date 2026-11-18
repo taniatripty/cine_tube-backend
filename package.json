@@ -8,7 +8,7 @@
     "start": "node dist/server.js",
     "build": "tsc ",
     "dev": "tsx watch src/server.ts",
-    "stripe:webhook":"stripe listen --forward-to localhost:5000/webhook"
+    "stripe:webhook": "stripe listen --forward-to localhost:5000/webhook"
   },
   "keywords": [],
   "author": "",
@@ -29,6 +29,7 @@
     "multer": "^2.5.0",
     "multer-storage-cloudinary": "^4.0.0",
     "nodemailer": "^10.4.0",
+    "pdfkit": "^0.20.2",
     "pg": "^8.23.1",
     "stripe": "^23.1.0",
     "tsx": "^4.23.15",
@@ -42,6 +43,7 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/multer": "^2.3.0",
     "@types/node": "^26.6.6",
+    "@types/pdfkit": "^0.17.7",
     "@types/pg": "^8.23.1",
     "prisma": "^7.10.1",
     "typescript": "^7.0.2"

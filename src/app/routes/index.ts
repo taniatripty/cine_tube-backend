@@ -5,9 +5,12 @@ import { genreRoutes } from "../module/genre/genre.routes";
 import { mediaRoutes } from "../module/media/media.routes";
 import { personRoutes } from "../module/person/person.route";
 import { seasonRoutes } from "../module/season/season.routes";
-import { subscriptionRoutes } from "../module/subscription/subscription.routes";
+
 import { streamingPlatformRoutes } from "../module/streamingPlatform/streamingPlatform.routes";
-import { watchListRoutes } from "../module/watchList/watchlist.routes";
+import { watchListRoutes } from "../module/watchList/watchList.routes";
+import { paymentRoutes } from "../module/payment/payment.routes";
+import { subscriptionRoutes } from "../module/subscription/subscription.routes";
+import { mediaAccessRoutes } from "../module/mediaAccess/mediaAccess.routes";
 
 
 
@@ -19,8 +22,11 @@ router.use("/genres", genreRoutes);
 router.use("/media", mediaRoutes);
 router.use("/person", personRoutes);
 router.use("/seasons", seasonRoutes);
-router.use("/subscriptions", subscriptionRoutes);
+
 router.use("/streaming-platforms", streamingPlatformRoutes);
 router.use("/watchlists", watchListRoutes);
+router.use("/payments", paymentRoutes);
+router.use("/subscriptions", subscriptionRoutes);
+router.use("/media-access", mediaAccessRoutes);
 
 export const indexRoutes=router;

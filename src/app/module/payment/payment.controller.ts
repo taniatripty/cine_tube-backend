@@ -7,6 +7,37 @@ import { stripe } from "../../config/stripe.config";
 import catchAsync from "../../shared/catchAsync";
 import { PaymentService } from "./payment.services";
 import sendResponse from "../../shared/sendResponse";
+import { IRequest } from "../../interface/requestUser.interface";
+
+
+const createMediaCheckout = catchAsync(
+  async (req: Request, res: Response) => {
+    const data = await PaymentService.createMediaCheckout(
+      req.user as IRequest,
+      req.body,
+    );
+
+    sendResponse({
+      res,
+      statusCode: status.CREATED,
+      success: true,
+      message: "Media checkout session created successfully.",
+      data,
+    });
+  },
+);
+
+const getMyPayments = catchAsync(async (req: Request, res: Response) => {
+  const data = await PaymentService.getMyPayments(req.user as IRequest);
+
+  sendResponse({
+    res,
+    statusCode: status.OK,
+    success: true,
+    message: "Payments retrieved successfully.",
+    data,
+  });
+});
 
 
 const handleStripeWebhookEvent = catchAsync(async (req : Request, res : Response) => {
@@ -49,5 +80,7 @@ const handleStripeWebhookEvent = catchAsync(async (req : Request, res : Response
 
 
 export const PaymentController = {
-    handleStripeWebhookEvent
+    handleStripeWebhookEvent,
+    createMediaCheckout,
+    getMyPayments,
 }

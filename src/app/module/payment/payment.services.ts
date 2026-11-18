@@ -1,10 +1,19 @@
 import Stripe from "stripe";
 import {
+  AccessType,
+  MediaStatus,
   PaymentStatus,
+  PaymentPurpose,
+  RentDuration,
   SubscriptionStatus,
 } from "../../../generated/prisma/enums";
 import { stripe } from "../../config/stripe.config";
 import { prisma } from "../../lib/prisma";
+import { envVars } from "../../config/env";
+import status from "http-status";
+import AppError from "../../errorHandler/AppError";
+import { IRequest } from "../../interface/requestUser.interface";
+import { randomUUID } from "node:crypto";
 
 type PaymentEventUpdate = {
   event: Stripe.Event;
@@ -13,6 +22,8 @@ type PaymentEventUpdate = {
   status: PaymentStatus;
   paymentIntentId?: string;
   paidAt?: Date;
+  mediaId?: string;
+  accessType?: AccessType;
 };
 
 const findPaymentIdByIntent = async (paymentIntentId: string) => {
@@ -31,10 +42,18 @@ const updatePaymentFromEvent = async ({
   status,
   paymentIntentId,
   paidAt,
+  mediaId,
+  accessType,
 }: PaymentEventUpdate) => {
   const payment = await prisma.payment.findUnique({
     where: { id: paymentId },
-    select: { id: true, stripeEventId: true },
+    select: {
+      id: true,
+      userId: true,
+      purpose: true,
+      rentDuration: true,
+      stripeEventId: true,
+    },
   });
 
   if (!payment) {
@@ -76,6 +95,47 @@ const updatePaymentFromEvent = async ({
     return { message: `Ignoring stale event ${event.id} for payment ${paymentId}` };
   }
 
+  if (status === PaymentStatus.PAID && payment.purpose !== PaymentPurpose.SUBSCRIPTION) {
+    if (!mediaId || !accessType) {
+      return { message: `Payment ${paymentId} updated to PAID` };
+    }
+
+    const existingAccess = await prisma.mediaAccess.findFirst({
+      where: { paymentId: payment.id, mediaId },
+      select: { id: true },
+    });
+
+    if (!existingAccess) {
+      let expiresAt: Date | null = null;
+      const startDate = paidAt ?? new Date();
+
+      if (accessType === AccessType.RENT_MONTH) {
+        expiresAt = new Date(startDate);
+        expiresAt.setUTCMonth(expiresAt.getUTCMonth() + 1);
+      } else if (accessType === AccessType.RENT_YEAR) {
+        expiresAt = new Date(startDate);
+        expiresAt.setUTCFullYear(expiresAt.getUTCFullYear() + 1);
+      }
+
+      await prisma.mediaAccess.create({
+        data: {
+          userId: payment.userId,
+          mediaId,
+          paymentId: payment.id,
+          type: accessType,
+          expiresAt,
+        },
+      });
+    }
+  }
+
+  if (status === PaymentStatus.REFUNDED) {
+    await prisma.mediaAccess.updateMany({
+      where: { paymentId: payment.id, revokedAt: null },
+      data: { revokedAt: paidAt ?? new Date() },
+    });
+  }
+
   return { message: `Payment ${paymentId} updated to ${status}` };
 };
 
@@ -112,6 +172,7 @@ const syncSubscriptionFromStripe = async (subscriptionId: string) => {
     select: { userId: true },
   });
   const userId = subscription.metadata.userId || existing?.userId;
+  const paymentId = subscription.metadata.paymentId;
 
   if (!userId) {
     return {
@@ -149,7 +210,7 @@ const syncSubscriptionFromStripe = async (subscriptionId: string) => {
       : null,
   };
 
-  return prisma.subscription.upsert({
+  const result = await prisma.subscription.upsert({
     where: { stripeSubscriptionId: subscription.id },
     create: {
       ...data,
@@ -157,6 +218,27 @@ const syncSubscriptionFromStripe = async (subscriptionId: string) => {
     },
     update: data,
   });
+
+  if (paymentId) {
+    await prisma.payment.updateMany({
+      where: { id: paymentId, subscriptionId: null },
+      data: {
+        subscriptionId: result.id,
+        status:
+          status === SubscriptionStatus.ACTIVE ||
+          status === SubscriptionStatus.TRIALING
+            ? PaymentStatus.PAID
+            : PaymentStatus.UNPAID,
+        paidAt:
+          status === SubscriptionStatus.ACTIVE ||
+          status === SubscriptionStatus.TRIALING
+            ? new Date()
+            : null,
+      },
+    });
+  }
+
+  return result;
 };
 
 const handlerStripeWebhookEvent = async (event: Stripe.Event) => {
@@ -209,6 +291,15 @@ const handlerStripeWebhookEvent = async (event: Stripe.Event) => {
         status: succeeded ? PaymentStatus.PAID : PaymentStatus.UNPAID,
         ...(succeeded ? { paidAt: new Date(event.created * 1000) } : {}),
         ...(paymentIntentId ? { paymentIntentId } : {}),
+        ...(session.metadata?.mediaId
+          ? { mediaId: session.metadata.mediaId }
+          : {}),
+        ...(session.metadata?.accessType &&
+          Object.values(AccessType).includes(
+            session.metadata.accessType as AccessType,
+          )
+          ? { accessType: session.metadata.accessType as AccessType }
+          : {}),
       });
     }
 
@@ -232,6 +323,15 @@ const handlerStripeWebhookEvent = async (event: Stripe.Event) => {
         paymentIntentId: paymentIntent.id,
         status: succeeded ? PaymentStatus.PAID : PaymentStatus.UNPAID,
         ...(succeeded ? { paidAt: new Date(event.created * 1000) } : {}),
+        ...(paymentIntent.metadata.mediaId
+          ? { mediaId: paymentIntent.metadata.mediaId }
+          : {}),
+        ...(paymentIntent.metadata.accessType &&
+          Object.values(AccessType).includes(
+            paymentIntent.metadata.accessType as AccessType,
+          )
+          ? { accessType: paymentIntent.metadata.accessType as AccessType }
+          : {}),
       });
     }
 
@@ -274,4 +374,128 @@ const handlerStripeWebhookEvent = async (event: Stripe.Event) => {
 
 export const PaymentService = {
   handlerStripeWebhookEvent,
+  createMediaCheckout: async (
+    user: IRequest,
+    payload: { mediaId: string; accessType: AccessType },
+  ) => {
+    const media = await prisma.media.findFirst({
+      where: {
+        id: payload.mediaId,
+        isDeleted: false,
+      },
+      select: {
+        id: true,
+        title: true,
+        status: true,
+        purchasePrice: true,
+        monthlyRentPrice: true,
+        yearlyRentPrice: true,
+        price: true,
+      },
+    });
+
+    if (!media) {
+      throw new AppError(status.NOT_FOUND, "Media not found.");
+    }
+
+    if (media.status !== MediaStatus.PUBLISHED) {
+      throw new AppError(
+        status.BAD_REQUEST,
+        `Media is ${media.status.toLowerCase()} and cannot be purchased or rented.`,
+      );
+    }
+
+    const amount =
+      payload.accessType === AccessType.PURCHASE
+        ? (media.purchasePrice ?? media.price)
+        : payload.accessType === AccessType.RENT_MONTH
+          ? media.monthlyRentPrice
+          : media.yearlyRentPrice;
+
+    if (amount === null || amount === undefined) {
+      throw new AppError(
+        status.BAD_REQUEST,
+        `This media does not have a price for ${payload.accessType}.`,
+      );
+    }
+
+    const purpose =
+      payload.accessType === AccessType.PURCHASE
+        ? PaymentPurpose.MEDIA_PURCHASE
+        : PaymentPurpose.MEDIA_RENT;
+    const rentDuration =
+      payload.accessType === AccessType.RENT_MONTH
+        ? RentDuration.MONTH
+        : payload.accessType === AccessType.RENT_YEAR
+          ? RentDuration.YEAR
+          : null;
+
+    const numericAmount = Number(amount);
+    if (!Number.isFinite(numericAmount) || numericAmount < 0) {
+      throw new AppError(status.BAD_REQUEST, "Invalid media price.");
+    }
+
+    const payment = await prisma.payment.create({
+      data: {
+        userId: user.userId,
+        purpose,
+        rentDuration,
+        currency: "USD",
+        amount: numericAmount,
+        transactionId: randomUUID(),
+        status: PaymentStatus.UNPAID,
+        paymentGatewayData: {
+          mediaId: media.id,
+          accessType: payload.accessType,
+        },
+      },
+    });
+
+    const session = await stripe.checkout.sessions.create({
+      mode: "payment",
+      customer_email: user.email,
+      success_url: `${envVars.FRONTEND_URL}`,
+      cancel_url: `${envVars.FRONTEND_URL}/payment/cancel`,
+      line_items: [
+        {
+          quantity: 1,
+          price_data: {
+            currency: "usd",
+            unit_amount: Math.round(numericAmount * 100),
+            product_data: {
+              name: media.title,
+            },
+          },
+        },
+      ],
+      metadata: {
+        paymentId: payment.id,
+        mediaId: media.id,
+        accessType: payload.accessType,
+      },
+      payment_intent_data: {
+        metadata: {
+          paymentId: payment.id,
+          mediaId: media.id,
+          accessType: payload.accessType,
+        },
+      },
+    });
+
+    return {
+      checkoutUrl: session.url,
+      sessionId: session.id,
+      paymentId: payment.id,
+    };
+  },
+  getMyPayments: async (user: IRequest) => {
+    return prisma.payment.findMany({
+      where: { userId: user.userId },
+      include: {
+        subscription: true,
+        mediaAccesses: true,
+      },
+      orderBy: { createdAt: "desc" },
+    });
+  },
 };

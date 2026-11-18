@@ -3,6 +3,9 @@ model Payment {
 
   userId         String
   subscriptionId String?
+  purpose        PaymentPurpose @default(MEDIA_PURCHASE)
+  rentDuration   RentDuration?
+  currency       String         @default("USD")
 
   transactionId         String  @unique
   stripeEventId         String? @unique
@@ -15,7 +18,7 @@ model Payment {
 
   paymentGatewayData Json?
   paidAt             DateTime?
-  mediaAccess        MediaAccess?
+  mediaAccesses      MediaAccess[]
 
   subscription Subscription? @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
 

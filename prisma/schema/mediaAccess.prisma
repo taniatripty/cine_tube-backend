@@ -3,7 +3,7 @@ model MediaAccess {
 
   userId    String
   mediaId   String
-  paymentId String @unique
+  paymentId String?
 
   type AccessType
 
@@ -15,10 +15,9 @@ model MediaAccess {
 
   user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   media   Media   @relation(fields: [mediaId], references: [id], onDelete: Cascade)
-  payment Payment @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  payment Payment? @relation(fields: [paymentId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, mediaId])
-  @@index([userId])
+  @@index([userId, mediaId, expiresAt])
   @@index([mediaId])
   @@index([expiresAt])
   @@map("mediaAccess")

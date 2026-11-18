@@ -50,9 +50,13 @@ const createMedia = async (payload: TCreateMediaInput) => {
       }
     }
 
+    const purchasePrice =
+      mediaData.purchasePrice ?? mediaData.price ?? null;
+
     return transaction.media.create({
       data: {
         ...mediaData,
+        purchasePrice,
         ...(genreIds?.length
           ? { genres: { connect: genreIds.map((id) => ({ id })) } }
           : {}),

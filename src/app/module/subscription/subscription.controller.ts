@@ -1,25 +1,50 @@
 import { Request, Response } from "express";
+import status from "http-status";
 import catchAsync from "../../shared/catchAsync";
 import sendResponse from "../../shared/sendResponse";
-import { subscriptionService } from "./subscription.services";
+import { SubscriptionService } from "./subscription.services";
 
-const createSubscription = catchAsync(
-  async (req: Request, res: Response) => {
-    const data = await subscriptionService.createSubscription(
-      req.user,
-      req.body,
-    );
+const createCheckout = catchAsync(async (req: Request, res: Response) => {
+  const data = await SubscriptionService.createCheckout(req.user, req.body);
 
-    sendResponse({
-      res,
-      statusCode: 201,
-      success: true,
-      message: "Subscription checkout created successfully.",
-      data,
-    });
-  },
-);
+  sendResponse({
+    res,
+    statusCode: status.CREATED,
+    success: true,
+    message: "Subscription checkout session created successfully.",
+    data,
+  });
+});
 
-export const subscriptionController = {
-  createSubscription,
+const getMySubscriptions = catchAsync(async (req: Request, res: Response) => {
+  const data = await SubscriptionService.getMySubscriptions(req.user);
+
+  sendResponse({
+    res,
+    statusCode: status.OK,
+    success: true,
+    message: "Subscriptions retrieved successfully.",
+    data,
+  });
+});
+
+const cancelSubscription = catchAsync(async (req: Request, res: Response) => {
+  const data = await SubscriptionService.cancelSubscription(
+    req.user,
+    req.params.subscriptionId as string,
+  );
+
+  sendResponse({
+    res,
+    statusCode: status.OK,
+    success: true,
+    message: "Subscription scheduled for cancellation.",
+    data,
+  });
+});
+
+export const SubscriptionController = {
+  createCheckout,
+  getMySubscriptions,
+  cancelSubscription,
 };
