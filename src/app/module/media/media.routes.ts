@@ -10,7 +10,7 @@ const router = Router();
 
 router.get(
   "/all",
- checkAuth(UserRole.ADMIN,UserRole.USER),
+
   mediaController.getAllMedia,
 );
 router.get(

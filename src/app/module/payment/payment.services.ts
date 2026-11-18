@@ -1,5 +1,9 @@
 import Stripe from "stripe";
-import { PaymentStatus } from "../../../generated/prisma/enums";
+import {
+  PaymentStatus,
+  SubscriptionStatus,
+} from "../../../generated/prisma/enums";
+import { stripe } from "../../config/stripe.config";
 import { prisma } from "../../lib/prisma";
 
 type PaymentEventUpdate = {
@@ -91,6 +95,70 @@ const getPaymentIdForIntent = async (paymentIntent: Stripe.PaymentIntent) => {
   return paymentId;
 };
 
+const subscriptionStatusByStripeStatus: Record<string, SubscriptionStatus> = {
+  incomplete: SubscriptionStatus.INCOMPLETE,
+  active: SubscriptionStatus.ACTIVE,
+  past_due: SubscriptionStatus.PAST_DUE,
+  canceled: SubscriptionStatus.CANCELED,
+  unpaid: SubscriptionStatus.UNPAID,
+  trialing: SubscriptionStatus.TRIALING,
+  incomplete_expired: SubscriptionStatus.CANCELED,
+};
+
+const syncSubscriptionFromStripe = async (subscriptionId: string) => {
+  const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+  const existing = await prisma.subscription.findUnique({
+    where: { stripeSubscriptionId: subscription.id },
+    select: { userId: true },
+  });
+  const userId = subscription.metadata.userId || existing?.userId;
+
+  if (!userId) {
+    return {
+      message: `Ignoring Stripe subscription ${subscription.id} without a linked user.`,
+    };
+  }
+
+  if (subscription.status === "paused") {
+    return {
+      message: `Stripe subscription ${subscription.id} is paused; the local schema has no paused status.`,
+    };
+  }
+
+  const status = subscriptionStatusByStripeStatus[subscription.status];
+  if (!status) {
+    throw new Error(
+      `Stripe subscription status ${subscription.status} is not supported by the local schema.`,
+    );
+  }
+
+  const item = subscription.items.data[0];
+  if (!item) {
+    throw new Error(`Stripe subscription ${subscription.id} has no price item.`);
+  }
+
+  const data = {
+    userId,
+    stripePriceId: item.price.id,
+    status,
+    currentPeriodStart: new Date(item.current_period_start * 1000),
+    currentPeriodEnd: new Date(item.current_period_end * 1000),
+    cancelAtPeriodEnd: subscription.cancel_at_period_end,
+    canceledAt: subscription.canceled_at
+      ? new Date(subscription.canceled_at * 1000)
+      : null,
+  };
+
+  return prisma.subscription.upsert({
+    where: { stripeSubscriptionId: subscription.id },
+    create: {
+      ...data,
+      stripeSubscriptionId: subscription.id,
+    },
+    update: data,
+  });
+};
+
 const handlerStripeWebhookEvent = async (event: Stripe.Event) => {
   switch (event.type) {
     case "checkout.session.completed":
@@ -98,6 +166,24 @@ const handlerStripeWebhookEvent = async (event: Stripe.Event) => {
     case "checkout.session.async_payment_failed":
     case "checkout.session.expired": {
       const session = event.data.object;
+      if (session.mode === "subscription") {
+        const subscriptionId =
+          typeof session.subscription === "string"
+            ? session.subscription
+            : session.subscription?.id;
+
+        if (!subscriptionId) {
+          if (event.type === "checkout.session.expired") {
+            return { message: `Checkout session ${session.id} expired.` };
+          }
+          throw new Error(
+            `Stripe Checkout session ${session.id} has no subscription.`,
+          );
+        }
+
+        return syncSubscriptionFromStripe(subscriptionId);
+      }
+
       const paymentId = session.metadata?.paymentId;
 
       if (!paymentId) {
@@ -124,6 +210,13 @@ const handlerStripeWebhookEvent = async (event: Stripe.Event) => {
         ...(succeeded ? { paidAt: new Date(event.created * 1000) } : {}),
         ...(paymentIntentId ? { paymentIntentId } : {}),
       });
+    }
+
+    case "customer.subscription.created":
+    case "customer.subscription.updated":
+    case "customer.subscription.deleted": {
+      const subscription = event.data.object;
+      return syncSubscriptionFromStripe(subscription.id);
     }
 
     case "payment_intent.succeeded":

@@ -6,7 +6,7 @@ import { episodeService } from "./episode.services";
 const createEpisode = catchAsync(async (req: Request, res: Response) => {
   const payload = {
     ...req.body,
-    thumbnail: req.file?.path ?? req.body.thumbnail,
+    thumbnail: req.file?.path 
   };
   const data = await episodeService.createEpisode(payload);
 
