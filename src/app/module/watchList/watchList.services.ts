@@ -5,6 +5,7 @@ import { IRequest } from "../../interface/requestUser.interface";
 import { TCreateWatchListInput } from "./watchlist.interface";
 
 
+
 const createWatchList = async (
   user: IRequest,
   payload: TCreateWatchListInput,
@@ -54,6 +55,37 @@ const createWatchList = async (
   });
 };
 
+const getMyWatchList = async (user: IRequest) => {
+  return prisma.watchList.findMany({
+    where: {
+      userId: user.userId,
+    },
+    include: {
+      media: true,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+};
+
+const deleteWatchListItem = async (user: IRequest, mediaId: string) => {
+  const result = await prisma.watchList.deleteMany({
+    where: {
+      userId: user.userId,
+      mediaId,
+    },
+  });
+
+  if (result.count === 0) {
+    throw new AppError(status.NOT_FOUND, "Watchlist item not found.");
+  }
+
+  return { mediaId };
+};
+
 export const watchListService = {
   createWatchList,
+  getMyWatchList,
+  deleteWatchListItem,
 };

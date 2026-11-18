@@ -11,6 +11,7 @@ import { watchListRoutes } from "../module/watchList/watchlist.routes";
 
 
 
+
 const router=Router();
 router.use("/auth",authRoutes);
 router.use("/episodes", episodeRoutes);
