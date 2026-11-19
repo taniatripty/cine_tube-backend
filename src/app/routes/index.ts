@@ -12,6 +12,8 @@ import { paymentRoutes } from "../module/payment/payment.routes";
 import { subscriptionRoutes } from "../module/subscription/subscription.routes";
 import { mediaAccessRoutes } from "../module/mediaAccess/mediaAccess.routes";
 import { reviewRoutes } from "../module/review/review.route";
+import { tagRoutes } from "../module/tag/tag.routes";
+import { commentRoutes } from "../module/commnet/comment.routes";
 
 
 
@@ -30,5 +32,7 @@ router.use("/payments", paymentRoutes);
 router.use("/subscriptions", subscriptionRoutes);
 router.use("/media-access", mediaAccessRoutes);
 router.use("/reviews", reviewRoutes);
+router.use("/tags", tagRoutes);
+router.use("/comments", commentRoutes);
 
 export const indexRoutes=router;
