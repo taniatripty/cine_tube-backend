@@ -11,6 +11,7 @@ import { watchListRoutes } from "../module/watchList/watchList.routes";
 import { paymentRoutes } from "../module/payment/payment.routes";
 import { subscriptionRoutes } from "../module/subscription/subscription.routes";
 import { mediaAccessRoutes } from "../module/mediaAccess/mediaAccess.routes";
+import { reviewRoutes } from "../module/review/review.route";
 
 
 
@@ -28,5 +29,6 @@ router.use("/watchlists", watchListRoutes);
 router.use("/payments", paymentRoutes);
 router.use("/subscriptions", subscriptionRoutes);
 router.use("/media-access", mediaAccessRoutes);
+router.use("/reviews", reviewRoutes);
 
 export const indexRoutes=router;
