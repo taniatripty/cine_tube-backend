@@ -1,4 +1,8 @@
 import { z } from "zod";
-import { createReviewValidation } from "./review.validation";
+import {
+  createReviewValidation,
+  moderateReviewValidation,
+} from "./review.validation";
 
 export type TCreateReviewInput = z.infer<typeof createReviewValidation>;
+export type TModerateReviewInput = z.infer<typeof moderateReviewValidation>;

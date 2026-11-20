@@ -2,7 +2,10 @@ import status from "http-status";
 import AppError from "../../errorHandler/AppError";
 import { IRequest } from "../../interface/requestUser.interface";
 import { prisma } from "../../lib/prisma";
-import { TCreateReviewInput } from "./review.interface";
+import {
+  TCreateReviewInput,
+  TModerateReviewInput,
+} from "./review.interface";
 
 const createReview = async (user: IRequest, payload: TCreateReviewInput) => {
   const media = await prisma.media.findFirst({
@@ -61,6 +64,39 @@ const createReview = async (user: IRequest, payload: TCreateReviewInput) => {
   });
 };
 
+const moderateReview = async (
+  user: IRequest,
+  reviewId: string,
+  payload: TModerateReviewInput,
+) => {
+  const review = await prisma.review.findUnique({
+    where: { id: reviewId },
+    select: { id: true },
+  });
+
+  if (!review) {
+    throw new AppError(status.NOT_FOUND, "Review not found.");
+  }
+
+  return prisma.review.update({
+    where: { id: review.id },
+    data: {
+      status: payload.status,
+      moderator: { connect: { id: user.userId } },
+      moderatedAt: new Date(),
+      ...(payload.moderationNote !== undefined
+        ? { moderationNote: payload.moderationNote }
+        : {}),
+    },
+    include: {
+      moderator: {
+        select: { id: true, name: true, email: true },
+      },
+    },
+  });
+};
+
 export const reviewService = {
   createReview,
+  moderateReview,
 };

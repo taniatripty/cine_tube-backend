@@ -15,6 +15,23 @@ const createComment = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const moderateComment = catchAsync(async (req: Request, res: Response) => {
+  const data = await commentService.moderateComment(
+    req.user,
+    req.params.id as string,
+    req.body,
+  );
+
+  sendResponse({
+    res,
+    statusCode: 200,
+    success: true,
+    message: "Comment moderated successfully.",
+    data,
+  });
+});
+
 export const commentController = {
   createComment,
+  moderateComment,
 };

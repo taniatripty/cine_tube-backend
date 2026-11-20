@@ -2,7 +2,10 @@ import status from "http-status";
 import AppError from "../../errorHandler/AppError";
 import { IRequest } from "../../interface/requestUser.interface";
 import { prisma } from "../../lib/prisma";
-import { TCreateCommentInput } from "./comment.interface";
+import {
+  TCreateCommentInput,
+  TModerateCommentInput,
+} from "./comment.interface";
 
 const createComment = async (
   user: IRequest,
@@ -44,6 +47,36 @@ const createComment = async (
   });
 };
 
+const moderateComment = async (
+  user: IRequest,
+  commentId: string,
+  payload: TModerateCommentInput,
+) => {
+  const comment = await prisma.comment.findUnique({
+    where: { id: commentId },
+    select: { id: true },
+  });
+
+  if (!comment) {
+    throw new AppError(status.NOT_FOUND, "Comment not found.");
+  }
+
+  return prisma.comment.update({
+    where: { id: comment.id },
+    data: {
+      status: payload.status,
+      moderatedBy: { connect: { id: user.userId } },
+      moderatedAt: new Date(),
+    },
+    include: {
+      moderatedBy: {
+        select: { id: true, name: true, email: true },
+      },
+    },
+  });
+};
+
 export const commentService = {
   createComment,
+  moderateComment,
 };

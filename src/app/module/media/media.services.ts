@@ -131,11 +131,27 @@ const getMediaById = async (id: string) => {
       id,
       isDeleted: false,
     },
-    include: {
+     include: {
       genres: true,
       seasons: { include: { episodes: true } },
       credits: { include: { person: true } },
       mediaAvailabilities: { include: { Platform: true } },
+      reviews:{
+        include:{
+          reviewLikes:true,
+          moderator:true,
+          
+          reports:true,
+          comments:{
+            include:{
+              commentLikes:true,
+              replies:true,
+              reports:true
+            }
+          }
+            
+        }
+      }
     },
   });
   return result;
