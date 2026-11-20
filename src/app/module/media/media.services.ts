@@ -102,6 +102,21 @@ const getAllMedia = async () => {
       seasons: { include: { episodes: true } },
       credits: { include: { person: true } },
       mediaAvailabilities: { include: { Platform: true } },
+      reviews:{
+        include:{
+          reviewLikes:true,
+          
+          reports:true,
+          comments:{
+            include:{
+              commentLikes:true,
+              replies:true,
+              reports:true
+            }
+          }
+            
+        }
+      }
     },
     orderBy: {
       createdAt: "desc",
