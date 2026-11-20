@@ -31,17 +31,33 @@ const createReview = async (user: IRequest, payload: TCreateReviewInput) => {
     throw new AppError(status.CONFLICT, "You have already reviewed this media.");
   }
 
-  return prisma.review.create({
-    data: {
-      userId: user.userId,
-      mediaId: media.id,
-      rating: payload.rating,
-      content: payload.content,
-      isSpoiler: payload.isSpoiler ?? false,
-    },
-    include: {
-      media: true,
-    },
+  return prisma.$transaction(async (transaction) => {
+    const review = await transaction.review.create({
+      data: {
+        userId: user.userId,
+        mediaId: media.id,
+        rating: payload.rating,
+        content: payload.content,
+        isSpoiler: payload.isSpoiler ?? false,
+      },
+    });
+
+    const reviewAggregate = await transaction.review.aggregate({
+      where: { mediaId: media.id },
+      _avg: { rating: true },
+      _count: { _all: true, rating: true },
+    });
+
+    const updatedMedia = await transaction.media.update({
+      where: { id: media.id },
+      data: {
+        reviewCount: reviewAggregate._count._all,
+        ratingCount: reviewAggregate._count.rating,
+        averageRating: reviewAggregate._avg.rating ?? 0,
+      },
+    });
+
+    return { ...review, media: updatedMedia };
   });
 };
 
