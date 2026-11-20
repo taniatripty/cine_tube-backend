@@ -493,7 +493,23 @@ export const PaymentService = {
       where: { userId: user.userId },
       include: {
         subscription: true,
-        mediaAccesses: true,
+        mediaAccesses: {
+          include: {
+            media: {
+              select: {
+                id: true,
+                title: true,
+                synopsis: true,
+                poster: true,
+                backdrop: true,
+                type: true,
+                releaseDate: true,
+                releaseYear: true,
+                runtime: true,
+              },
+            },
+          },
+        },
       },
       orderBy: { createdAt: "desc" },
     });
