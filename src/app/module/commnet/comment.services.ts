@@ -5,6 +5,7 @@ import { prisma } from "../../lib/prisma";
 import {
   TCreateCommentInput,
   TModerateCommentInput,
+  TSetCommentReactionInput,
 } from "./comment.interface";
 
 const createComment = async (
@@ -76,7 +77,74 @@ const moderateComment = async (
   });
 };
 
+const setCommentReaction = async (
+  user: IRequest,
+  commentId: string,
+  payload: TSetCommentReactionInput,
+) => {
+  return prisma.$transaction(async (transaction) => {
+    const comment = await transaction.comment.findUnique({
+      where: { id: commentId },
+      select: { id: true },
+    });
+
+    if (!comment) {
+      throw new AppError(status.NOT_FOUND, "Comment not found.");
+    }
+
+    const reaction = await transaction.commentLike.upsert({
+      where: {
+        userId_commentId: {
+          userId: user.userId,
+          commentId: comment.id,
+        },
+      },
+      create: {
+        userId: user.userId,
+        commentId: comment.id,
+        type: payload.type,
+      },
+      update: { type: payload.type },
+    });
+
+    const reactionCounts = await transaction.commentLike.groupBy({
+      by: ["type"],
+      where: { commentId: comment.id },
+      _count: { _all: true },
+    });
+
+    return { reaction, reactionCounts };
+  });
+};
+
+const removeCommentReaction = async (user: IRequest, commentId: string) => {
+  return prisma.$transaction(async (transaction) => {
+    const comment = await transaction.comment.findUnique({
+      where: { id: commentId },
+      select: { id: true },
+    });
+
+    if (!comment) {
+      throw new AppError(status.NOT_FOUND, "Comment not found.");
+    }
+
+    await transaction.commentLike.deleteMany({
+      where: { userId: user.userId, commentId: comment.id },
+    });
+
+    const reactionCounts = await transaction.commentLike.groupBy({
+      by: ["type"],
+      where: { commentId: comment.id },
+      _count: { _all: true },
+    });
+
+    return { reaction: null, reactionCounts };
+  });
+};
+
 export const commentService = {
   createComment,
   moderateComment,
+  setCommentReaction,
+  removeCommentReaction,
 };

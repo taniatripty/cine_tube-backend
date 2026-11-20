@@ -1,6 +1,7 @@
 model CommentLike {
   userId    String
   commentId String
+  type      ContentReactionType
 
   createdAt DateTime @default(now())
 
@@ -8,6 +9,6 @@ model CommentLike {
   comment Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
 
   @@id([userId, commentId])
-  @@index([commentId])
+  @@index([commentId, type])
   @@map("commentLike")
 }

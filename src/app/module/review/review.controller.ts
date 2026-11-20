@@ -31,7 +31,40 @@ const moderateReview = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const setReviewReaction = catchAsync(async (req: Request, res: Response) => {
+  const data = await reviewService.setReviewReaction(
+    req.user,
+    req.params.id as string,
+    req.body,
+  );
+
+  sendResponse({
+    res,
+    statusCode: 200,
+    success: true,
+    message: "Review reaction saved successfully.",
+    data,
+  });
+});
+
+const removeReviewReaction = catchAsync(async (req: Request, res: Response) => {
+  const data = await reviewService.removeReviewReaction(
+    req.user,
+    req.params.id as string,
+  );
+
+  sendResponse({
+    res,
+    statusCode: 200,
+    success: true,
+    message: "Review reaction removed successfully.",
+    data,
+  });
+});
+
 export const reviewController = {
   createReview,
   moderateReview,
+  setReviewReaction,
+  removeReviewReaction,
 };

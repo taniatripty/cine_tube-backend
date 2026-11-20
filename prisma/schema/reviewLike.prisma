@@ -1,6 +1,7 @@
 model ReviewLike {
   userId   String
   reviewId String
+  type     ContentReactionType
 
   createdAt DateTime @default(now())
 
@@ -8,6 +9,6 @@ model ReviewLike {
   review Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
 
   @@id([userId, reviewId])
-  @@index([reviewId])
+  @@index([reviewId, type])
   @@map("reviewLike")
 }

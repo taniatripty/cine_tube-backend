@@ -42,6 +42,16 @@ enum CommentStatus {
   HIDDEN
 }
 
+enum ContentReactionType {
+  LIKE
+  DISLIKE
+  LOVE
+  LAUGH
+  WOW
+  SAD
+  ANGRY
+}
+
 enum SubscriptionStatus {
   INCOMPLETE
   ACTIVE

@@ -31,7 +31,40 @@ const moderateComment = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const setCommentReaction = catchAsync(async (req: Request, res: Response) => {
+  const data = await commentService.setCommentReaction(
+    req.user,
+    req.params.id as string,
+    req.body,
+  );
+
+  sendResponse({
+    res,
+    statusCode: 200,
+    success: true,
+    message: "Comment reaction saved successfully.",
+    data,
+  });
+});
+
+const removeCommentReaction = catchAsync(async (req: Request, res: Response) => {
+  const data = await commentService.removeCommentReaction(
+    req.user,
+    req.params.id as string,
+  );
+
+  sendResponse({
+    res,
+    statusCode: 200,
+    success: true,
+    message: "Comment reaction removed successfully.",
+    data,
+  });
+});
+
 export const commentController = {
   createComment,
   moderateComment,
+  setCommentReaction,
+  removeCommentReaction,
 };

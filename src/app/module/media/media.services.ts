@@ -110,7 +110,7 @@ const getAllMedia = async () => {
           comments:{
             include:{
               commentLikes:true,
-              replies:true,
+              replies:{include:{commentLikes:true}},
               reports:true
             }
           }
@@ -140,12 +140,19 @@ const getMediaById = async (id: string) => {
         include:{
           reviewLikes:true,
           moderator:true,
+          user:true,
           
           reports:true,
           comments:{
             include:{
               commentLikes:true,
-              replies:true,
+              user:true,
+              replies:{
+                include:{
+                  user:true,
+                  commentLikes:true
+                }
+              },
               reports:true
             }
           }

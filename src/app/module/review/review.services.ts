@@ -5,6 +5,7 @@ import { prisma } from "../../lib/prisma";
 import {
   TCreateReviewInput,
   TModerateReviewInput,
+  TSetReviewReactionInput,
 } from "./review.interface";
 
 const createReview = async (user: IRequest, payload: TCreateReviewInput) => {
@@ -96,7 +97,74 @@ const moderateReview = async (
   });
 };
 
+const setReviewReaction = async (
+  user: IRequest,
+  reviewId: string,
+  payload: TSetReviewReactionInput,
+) => {
+  return prisma.$transaction(async (transaction) => {
+    const review = await transaction.review.findUnique({
+      where: { id: reviewId },
+      select: { id: true },
+    });
+
+    if (!review) {
+      throw new AppError(status.NOT_FOUND, "Review not found.");
+    }
+
+    const reaction = await transaction.reviewLike.upsert({
+      where: {
+        userId_reviewId: {
+          userId: user.userId,
+          reviewId: review.id,
+        },
+      },
+      create: {
+        userId: user.userId,
+        reviewId: review.id,
+        type: payload.type,
+      },
+      update: { type: payload.type },
+    });
+
+    const reactionCounts = await transaction.reviewLike.groupBy({
+      by: ["type"],
+      where: { reviewId: review.id },
+      _count: { _all: true },
+    });
+
+    return { reaction, reactionCounts };
+  });
+};
+
+const removeReviewReaction = async (user: IRequest, reviewId: string) => {
+  return prisma.$transaction(async (transaction) => {
+    const review = await transaction.review.findUnique({
+      where: { id: reviewId },
+      select: { id: true },
+    });
+
+    if (!review) {
+      throw new AppError(status.NOT_FOUND, "Review not found.");
+    }
+
+    await transaction.reviewLike.deleteMany({
+      where: { userId: user.userId, reviewId: review.id },
+    });
+
+    const reactionCounts = await transaction.reviewLike.groupBy({
+      by: ["type"],
+      where: { reviewId: review.id },
+      _count: { _all: true },
+    });
+
+    return { reaction: null, reactionCounts };
+  });
+};
+
 export const reviewService = {
   createReview,
   moderateReview,
+  setReviewReaction,
+  removeReviewReaction,
 };

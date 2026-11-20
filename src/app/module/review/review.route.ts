@@ -6,6 +6,7 @@ import { reviewController } from "./review.controller";
 import {
   createReviewValidation,
   moderateReviewValidation,
+  setReviewReactionValidation,
 } from "./review.validation";
 
 const router = Router();
@@ -22,6 +23,19 @@ router.patch(
   checkAuth(UserRole.ADMIN),
   validateRequest(moderateReviewValidation),
   reviewController.moderateReview,
+);
+
+router.put(
+  "/:id/reaction",
+  checkAuth(UserRole.ADMIN, UserRole.USER),
+  validateRequest(setReviewReactionValidation),
+  reviewController.setReviewReaction,
+);
+
+router.delete(
+  "/:id/reaction",
+  checkAuth(UserRole.ADMIN, UserRole.USER),
+  reviewController.removeReviewReaction,
 );
 
 export const reviewRoutes = router;

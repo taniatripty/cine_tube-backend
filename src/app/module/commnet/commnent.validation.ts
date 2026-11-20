@@ -1,5 +1,8 @@
 import { z } from "zod";
-import { CommentStatus } from "../../../generated/prisma/enums";
+import {
+  CommentStatus,
+  ContentReactionType,
+} from "../../../generated/prisma/enums";
 
 export const createCommentValidation = z.object({
   reviewId: z.string().trim().min(1),
@@ -9,4 +12,8 @@ export const createCommentValidation = z.object({
 
 export const moderateCommentValidation = z.object({
   status: z.enum(CommentStatus),
+});
+
+export const setCommentReactionValidation = z.object({
+  type: z.enum(ContentReactionType),
 });
