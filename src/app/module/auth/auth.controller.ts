@@ -171,7 +171,7 @@ const logoutUser = catchAsync(async (req: Request, res: Response) => {
 });
 
 const googleLogin = catchAsync(async (req: Request, res: Response) => {
-  const redirectPath = req.query.redirect as string  || "/dashboard";
+  const redirectPath = req.query.redirect as string  || "/user/dashboard";
   const encodedRedirectPath = encodeURIComponent(redirectPath as string);
   const callbackURL = `${envVars.BETTER_AUTH_URL}/api/v1/auth/google/success?redirect=${encodedRedirectPath}`;
   res.render("googleRedirects", {
@@ -187,7 +187,7 @@ const googleloginSuccess = catchAsync(
         const redirectPath =
             typeof req.query.redirect === "string"
                 ? req.query.redirect
-                : "/dashboard";
+                : "/user/dashboard";
 
         const sessionToken = req.cookies["better-auth.session_token"];
 
@@ -228,7 +228,7 @@ const googleloginSuccess = catchAsync(
 
         const finalRedirectPath = isValidRedirectPath
             ? redirectPath
-            : "/dashboard";
+            : "/user/dashboard";
 
         // Redirect frontend
         return res.redirect(
