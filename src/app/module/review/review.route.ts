@@ -11,6 +11,12 @@ import {
 
 const router = Router();
 
+router.get(
+  "/",
+  checkAuth(UserRole.ADMIN, UserRole.USER),
+  reviewController.getMyReviews,
+);
+
 router.post(
   "/",
   checkAuth(UserRole.ADMIN, UserRole.USER),

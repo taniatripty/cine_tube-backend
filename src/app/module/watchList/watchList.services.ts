@@ -2,7 +2,7 @@ import status from "http-status";
 import AppError from "../../errorHandler/AppError";
 import { prisma } from "../../lib/prisma";
 import { IRequest } from "../../interface/requestUser.interface";
-import { TCreateWatchListInput } from "./watchlist.interface";
+import { TCreateWatchListInput } from "./watchList.interface";
 
 
 

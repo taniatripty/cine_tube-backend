@@ -8,6 +8,38 @@ import {
   TSetReviewReactionInput,
 } from "./review.interface";
 
+const getMyReviews = async (user: IRequest) => {
+  return prisma.review.findMany({
+    where: {
+      userId: user.userId,
+    },
+    include: {
+      media: {
+        select: {
+          id: true,
+          title: true,
+          synopsis: true,
+          poster: true,
+          backdrop: true,
+          type: true,
+          releaseYear: true,
+          averageRating: true,
+          reviewCount: true,
+        },
+      },
+      reviewLikes: true,
+      comments: {
+        include: {
+          commentLikes: true,
+        },
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+};
+
 const createReview = async (user: IRequest, payload: TCreateReviewInput) => {
   const media = await prisma.media.findFirst({
     where: {
@@ -163,6 +195,7 @@ const removeReviewReaction = async (user: IRequest, reviewId: string) => {
 };
 
 export const reviewService = {
+  getMyReviews,
   createReview,
   moderateReview,
   setReviewReaction,
