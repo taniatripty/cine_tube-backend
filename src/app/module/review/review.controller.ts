@@ -74,9 +74,42 @@ const removeReviewReaction = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const updateReview = catchAsync(async (req: Request, res: Response) => {
+  const data = await reviewService.updateReview(
+    req.user,
+    req.params.id as string,
+    req.body,
+  );
+
+  sendResponse({
+    res,
+    statusCode: 200,
+    success: true,
+    message: "Review updated successfully.",
+    data,
+  });
+});
+
+const deleteReview = catchAsync(async (req: Request, res: Response) => {
+  const data = await reviewService.deleteReview(
+    req.user,
+    req.params.id as string,
+  );
+
+  sendResponse({
+    res,
+    statusCode: 200,
+    success: true,
+    message: "Review deleted successfully.",
+    data,
+  });
+});
+
 export const reviewController = {
   getMyReviews,
   createReview,
+  updateReview,
+  deleteReview,
   moderateReview,
   setReviewReaction,
   removeReviewReaction,

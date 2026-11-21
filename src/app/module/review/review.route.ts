@@ -7,6 +7,7 @@ import {
   createReviewValidation,
   moderateReviewValidation,
   setReviewReactionValidation,
+  updateReviewValidation,
 } from "./review.validation";
 
 const router = Router();
@@ -22,6 +23,19 @@ router.post(
   checkAuth(UserRole.ADMIN, UserRole.USER),
   validateRequest(createReviewValidation),
   reviewController.createReview,
+);
+
+router.patch(
+  "/:id",
+  checkAuth(UserRole.ADMIN, UserRole.USER),
+  validateRequest(updateReviewValidation),
+  reviewController.updateReview,
+);
+
+router.delete(
+  "/:id",
+  checkAuth(UserRole.ADMIN, UserRole.USER),
+  reviewController.deleteReview,
 );
 
 router.patch(

@@ -6,7 +6,9 @@ import {
   TCreateReviewInput,
   TModerateReviewInput,
   TSetReviewReactionInput,
+  TUpdateReviewInput,
 } from "./review.interface";
+import { ReviewStatus } from "../../../generated/prisma/enums";
 
 const getMyReviews = async (user: IRequest) => {
   return prisma.review.findMany({
@@ -194,9 +196,92 @@ const removeReviewReaction = async (user: IRequest, reviewId: string) => {
   });
 };
 
+const updateReview = async (
+  user: IRequest,
+  reviewId: string,
+  payload: TUpdateReviewInput,
+) => {
+  const review = await prisma.review.findUnique({
+    where: { id: reviewId },
+    select: { id: true, userId: true, status: true, mediaId: true },
+  });
+
+  if (!review) {
+    throw new AppError(status.NOT_FOUND, "Review not found.");
+  }
+
+  if (review.userId !== user.userId) {
+    throw new AppError(status.FORBIDDEN, "You can only edit your own reviews.");
+  }
+
+  if (review.status !== ReviewStatus.PENDING) {
+    throw new AppError(
+      status.FORBIDDEN,
+      "Only PENDING reviews can be edited.",
+    );
+  }
+
+  return prisma.review.update({
+    where: { id: review.id },
+    data: {
+      ...(payload.rating !== undefined ? { rating: payload.rating } : {}),
+      ...(payload.content !== undefined ? { content: payload.content } : {}),
+      ...(payload.isSpoiler !== undefined ? { isSpoiler: payload.isSpoiler } : {}),
+    },
+  });
+};
+
+const deleteReview = async (user: IRequest, reviewId: string) => {
+  const review = await prisma.review.findUnique({
+    where: { id: reviewId },
+    select: { id: true, userId: true, status: true, mediaId: true },
+  });
+
+  if (!review) {
+    throw new AppError(status.NOT_FOUND, "Review not found.");
+  }
+
+  if (review.userId !== user.userId) {
+    throw new AppError(
+      status.FORBIDDEN,
+      "You can only delete your own reviews.",
+    );
+  }
+
+  if (review.status !== ReviewStatus.PENDING) {
+    throw new AppError(
+      status.FORBIDDEN,
+      "Only PENDING reviews can be deleted.",
+    );
+  }
+
+  return prisma.$transaction(async (transaction) => {
+    await transaction.review.delete({ where: { id: review.id } });
+
+    const reviewAggregate = await transaction.review.aggregate({
+      where: { mediaId: review.mediaId },
+      _avg: { rating: true },
+      _count: { _all: true, rating: true },
+    });
+
+    await transaction.media.update({
+      where: { id: review.mediaId },
+      data: {
+        reviewCount: reviewAggregate._count._all,
+        ratingCount: reviewAggregate._count.rating,
+        averageRating: reviewAggregate._avg.rating ?? 0,
+      },
+    });
+
+    return { id: review.id };
+  });
+};
+
 export const reviewService = {
   getMyReviews,
   createReview,
+  updateReview,
+  deleteReview,
   moderateReview,
   setReviewReaction,
   removeReviewReaction,

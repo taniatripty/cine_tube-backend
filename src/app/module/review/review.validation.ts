@@ -19,3 +19,9 @@ export const moderateReviewValidation = z.object({
 export const setReviewReactionValidation = z.object({
   type: z.enum(ContentReactionType),
 });
+
+export const updateReviewValidation = z.object({
+  rating: z.number().int().min(1).max(5).optional(),
+  content: z.string().trim().min(1).optional(),
+  isSpoiler: z.boolean().optional(),
+});
