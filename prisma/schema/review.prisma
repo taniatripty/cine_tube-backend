@@ -1,3 +1,6 @@
+
+
+
 model Review {
   id      String @id @default(uuid())
   userId  String
@@ -8,19 +11,35 @@ model Review {
 
   isSpoiler Boolean @default(false)
 
+  
+  likeCount    Int @default(0)
+  dislikeCount Int @default(0)
+  loveCount    Int @default(0)
+  laughCount   Int @default(0)
+  wowCount     Int @default(0)
+  sadCount     Int @default(0)
+  angryCount   Int @default(0)
+
+  commentCount Int @default(0)
+
   status ReviewStatus @default(PENDING)
 
   moderatedById  String?
   moderatedAt    DateTime?
   moderationNote String?
-  tags           Tag[]
-  comments       Comment[]
-  reviewLikes    ReviewLike[]
-  reports        ContentReport[]
-  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  media          Media           @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+
+  tags        Tag[]
+  comments    Comment[]
+  reviewLikes ReviewLike[]
+  reports     ContentReport[]
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  media Media @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+
+  
 
   moderator User?    @relation("ReviewModerator", fields: [moderatedById], references: [id], onDelete: SetNull)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
