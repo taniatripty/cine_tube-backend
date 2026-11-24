@@ -62,8 +62,41 @@ const removeCommentReaction = catchAsync(async (req: Request, res: Response) => 
   });
 });
 
+const updateComment = catchAsync(async (req: Request, res: Response) => {
+  const data = await commentService.updateComment(
+    req.user,
+    req.params.id as string,
+    req.body,
+  );
+
+  sendResponse({
+    res,
+    statusCode: 200,
+    success: true,
+    message: "Comment updated successfully.",
+    data,
+  });
+});
+
+const deleteComment = catchAsync(async (req: Request, res: Response) => {
+  const data = await commentService.deleteComment(
+    req.user,
+    req.params.id as string,
+  );
+
+  sendResponse({
+    res,
+    statusCode: 200,
+    success: true,
+    message: "Comment deleted successfully.",
+    data,
+  });
+});
+
 export const commentController = {
   createComment,
+  updateComment,
+  deleteComment,
   moderateComment,
   setCommentReaction,
   removeCommentReaction,

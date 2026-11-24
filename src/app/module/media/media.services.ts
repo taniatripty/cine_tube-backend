@@ -105,16 +105,35 @@ const getAllMedia = async () => {
       reviews:{
         include:{
           reviewLikes:true,
-          
           reports:true,
           comments:{
             include:{
               commentLikes:true,
-              replies:{include:{commentLikes:true}},
-              reports:true
+              replies:{
+                include:{
+                  commentLikes:true,
+                  _count:{
+                    select:{
+                      commentLikes:true,
+                    }
+                  }
+                }
+              },
+              reports:true,
+              _count:{
+                select:{
+                  commentLikes:true,
+                  replies:true
+                }
+              }
+            }
+          },
+          _count:{
+            select:{
+              reviewLikes:true,
+              comments:true
             }
           }
-            
         }
       }
     },
@@ -141,7 +160,6 @@ const getMediaById = async (id: string) => {
           reviewLikes:true,
           moderator:true,
           user:true,
-          
           reports:true,
           comments:{
             include:{
@@ -150,13 +168,29 @@ const getMediaById = async (id: string) => {
               replies:{
                 include:{
                   user:true,
-                  commentLikes:true
+                  commentLikes:true,
+                  _count:{
+                    select:{
+                      commentLikes:true,
+                    }
+                  }
                 }
               },
-              reports:true
+              reports:true,
+              _count:{
+                select:{
+                  commentLikes:true,
+                  replies:true
+                }
+              }
+            }
+          },
+          _count:{
+            select:{
+              reviewLikes:true,
+              comments:true
             }
           }
-            
         }
       }
     },

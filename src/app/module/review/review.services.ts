@@ -27,12 +27,25 @@ const getMyReviews = async (user: IRequest) => {
           releaseYear: true,
           averageRating: true,
           reviewCount: true,
+          reactionCount: true,
         },
       },
       reviewLikes: true,
       comments: {
         include: {
           commentLikes: true,
+          _count: {
+            select: {
+              commentLikes: true,
+              replies: true,
+            },
+          },
+        },
+      },
+      _count: {
+        select: {
+          reviewLikes: true,
+          comments: true,
         },
       },
     },
@@ -139,7 +152,7 @@ const setReviewReaction = async (
   return prisma.$transaction(async (transaction) => {
     const review = await transaction.review.findUnique({
       where: { id: reviewId },
-      select: { id: true },
+      select: { id: true, mediaId: true },
     });
 
     if (!review) {
@@ -167,7 +180,62 @@ const setReviewReaction = async (
       _count: { _all: true },
     });
 
-    return { reaction, reactionCounts };
+    const reactionCountMap = reactionCounts.reduce(
+      (acc, curr) => {
+        acc[curr.type] = curr._count._all;
+        acc.total += curr._count._all;
+        return acc;
+      },
+      {
+        LIKE: 0,
+        DISLIKE: 0,
+        LOVE: 0,
+        LAUGH: 0,
+        WOW: 0,
+        SAD: 0,
+        ANGRY: 0,
+        total: 0,
+      } as Record<string, number>,
+    );
+
+    const updatedReview = await transaction.review.update({
+      where: { id: review.id },
+      data: {
+        likeCount: reactionCountMap.LIKE,
+        dislikeCount: reactionCountMap.DISLIKE,
+        loveCount: reactionCountMap.LOVE,
+        laughCount: reactionCountMap.LAUGH,
+        wowCount: reactionCountMap.WOW,
+        sadCount: reactionCountMap.SAD,
+        angryCount: reactionCountMap.ANGRY,
+        reactionCount: reactionCountMap.total,
+      },
+      include: {
+        _count: {
+          select: {
+            reviewLikes: true,
+            comments: true,
+          },
+        },
+      },
+    });
+
+    const totalMediaReactions = await transaction.reviewLike.count({
+      where: {
+        review: {
+          mediaId: review.mediaId,
+        },
+      },
+    });
+
+    await transaction.media.update({
+      where: { id: review.mediaId },
+      data: {
+        reactionCount: totalMediaReactions,
+      },
+    });
+
+    return { reaction, reactionCounts, review: updatedReview };
   });
 };
 
@@ -175,7 +243,7 @@ const removeReviewReaction = async (user: IRequest, reviewId: string) => {
   return prisma.$transaction(async (transaction) => {
     const review = await transaction.review.findUnique({
       where: { id: reviewId },
-      select: { id: true },
+      select: { id: true, mediaId: true },
     });
 
     if (!review) {
@@ -192,7 +260,62 @@ const removeReviewReaction = async (user: IRequest, reviewId: string) => {
       _count: { _all: true },
     });
 
-    return { reaction: null, reactionCounts };
+    const reactionCountMap = reactionCounts.reduce(
+      (acc, curr) => {
+        acc[curr.type] = curr._count._all;
+        acc.total += curr._count._all;
+        return acc;
+      },
+      {
+        LIKE: 0,
+        DISLIKE: 0,
+        LOVE: 0,
+        LAUGH: 0,
+        WOW: 0,
+        SAD: 0,
+        ANGRY: 0,
+        total: 0,
+      } as Record<string, number>,
+    );
+
+    const updatedReview = await transaction.review.update({
+      where: { id: review.id },
+      data: {
+        likeCount: reactionCountMap.LIKE,
+        dislikeCount: reactionCountMap.DISLIKE,
+        loveCount: reactionCountMap.LOVE,
+        laughCount: reactionCountMap.LAUGH,
+        wowCount: reactionCountMap.WOW,
+        sadCount: reactionCountMap.SAD,
+        angryCount: reactionCountMap.ANGRY,
+        reactionCount: reactionCountMap.total,
+      },
+      include: {
+        _count: {
+          select: {
+            reviewLikes: true,
+            comments: true,
+          },
+        },
+      },
+    });
+
+    const totalMediaReactions = await transaction.reviewLike.count({
+      where: {
+        review: {
+          mediaId: review.mediaId,
+        },
+      },
+    });
+
+    await transaction.media.update({
+      where: { id: review.mediaId },
+      data: {
+        reactionCount: totalMediaReactions,
+      },
+    });
+
+    return { reaction: null, reactionCounts, review: updatedReview };
   });
 };
 
@@ -221,13 +344,53 @@ const updateReview = async (
     );
   }
 
-  return prisma.review.update({
-    where: { id: review.id },
-    data: {
-      ...(payload.rating !== undefined ? { rating: payload.rating } : {}),
-      ...(payload.content !== undefined ? { content: payload.content } : {}),
-      ...(payload.isSpoiler !== undefined ? { isSpoiler: payload.isSpoiler } : {}),
-    },
+  return prisma.$transaction(async (transaction) => {
+    const updatedReview = await transaction.review.update({
+      where: { id: review.id },
+      data: {
+        ...(payload.rating !== undefined ? { rating: payload.rating } : {}),
+        ...(payload.content !== undefined ? { content: payload.content } : {}),
+        ...(payload.isSpoiler !== undefined ? { isSpoiler: payload.isSpoiler } : {}),
+      },
+      include: {
+        reviewLikes: true,
+        comments: {
+          include: {
+            commentLikes: true,
+            _count: {
+              select: {
+                commentLikes: true,
+                replies: true,
+              },
+            },
+          },
+        },
+        _count: {
+          select: {
+            reviewLikes: true,
+            comments: true,
+          },
+        },
+      },
+    });
+
+    if (payload.rating !== undefined) {
+      const reviewAggregate = await transaction.review.aggregate({
+        where: { mediaId: review.mediaId },
+        _avg: { rating: true },
+        _count: { _all: true, rating: true },
+      });
+
+      await transaction.media.update({
+        where: { id: review.mediaId },
+        data: {
+          averageRating: reviewAggregate._avg.rating ?? 0,
+          ratingCount: reviewAggregate._count.rating,
+        },
+      });
+    }
+
+    return updatedReview;
   });
 };
 
@@ -264,12 +427,21 @@ const deleteReview = async (user: IRequest, reviewId: string) => {
       _count: { _all: true, rating: true },
     });
 
+    const totalMediaReactions = await transaction.reviewLike.count({
+      where: {
+        review: {
+          mediaId: review.mediaId,
+        },
+      },
+    });
+
     await transaction.media.update({
       where: { id: review.mediaId },
       data: {
         reviewCount: reviewAggregate._count._all,
         ratingCount: reviewAggregate._count.rating,
         averageRating: reviewAggregate._avg.rating ?? 0,
+        reactionCount: totalMediaReactions,
       },
     });
 

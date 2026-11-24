@@ -20,6 +20,7 @@ model Media {
   averageRating       Float               @default(0)
   ratingCount         Int                 @default(0)
   reviewCount         Int                 @default(0)
+  reactionCount       Int                 @default(0)
   genres              Genre[]
   mediaAvailabilities MediaAvailability[]
   credits             MediaCredit[]

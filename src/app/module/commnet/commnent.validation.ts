@@ -17,3 +17,7 @@ export const moderateCommentValidation = z.object({
 export const setCommentReactionValidation = z.object({
   type: z.enum(ContentReactionType),
 });
+
+export const updateCommentValidation = z.object({
+  content: z.string().trim().min(1),
+});

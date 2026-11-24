@@ -45,6 +45,7 @@ model Comment {
   wowCount     Int @default(0)
   sadCount     Int @default(0)
   angryCount   Int @default(0)
+  reactionCount Int @default(0)
 
   replyCount Int @default(0)
 

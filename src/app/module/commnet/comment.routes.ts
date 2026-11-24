@@ -7,6 +7,7 @@ import {
   createCommentValidation,
   moderateCommentValidation,
   setCommentReactionValidation,
+  updateCommentValidation,
 } from "./commnent.validation";
 
 const router = Router();
@@ -16,6 +17,19 @@ router.post(
   checkAuth(UserRole.ADMIN, UserRole.USER),
   validateRequest(createCommentValidation),
   commentController.createComment,
+);
+
+router.patch(
+  "/:id",
+  checkAuth(UserRole.ADMIN, UserRole.USER),
+  validateRequest(updateCommentValidation),
+  commentController.updateComment,
+);
+
+router.delete(
+  "/:id",
+  checkAuth(UserRole.ADMIN, UserRole.USER),
+  commentController.deleteComment,
 );
 
 router.patch(

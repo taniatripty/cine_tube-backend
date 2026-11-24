@@ -19,6 +19,7 @@ model Review {
   wowCount     Int @default(0)
   sadCount     Int @default(0)
   angryCount   Int @default(0)
+  reactionCount Int @default(0)
 
   commentCount Int @default(0)
 
