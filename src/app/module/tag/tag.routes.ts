@@ -7,6 +7,14 @@ import { createTagValidation } from "./tag.validation";
 
 const router = Router();
 
+
+
+router.get(
+  "/all",
+  checkAuth(UserRole.ADMIN, UserRole.USER),
+  tagController.getAllTags,
+);
+
 router.post(
   "/",
   checkAuth(UserRole.ADMIN),

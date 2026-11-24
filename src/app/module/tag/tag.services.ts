@@ -7,6 +7,22 @@ const createTag = async (payload: TCreateTagInput) => {
   });
 };
 
+const getAllTags = async () => {
+  return prisma.tag.findMany({
+    orderBy: {
+      name: "asc",
+    },
+    include: {
+      _count: {
+        select: {
+          reviews: true,
+        },
+      },
+    },
+  });
+};
+
 export const tagService = {
   createTag,
+  getAllTags,
 };
