@@ -30,6 +30,7 @@ const getMyReviews = async (user: IRequest) => {
           reactionCount: true,
         },
       },
+      tags: true,
       reviewLikes: true,
       comments: {
         include: {
@@ -82,6 +83,28 @@ const createReview = async (user: IRequest, payload: TCreateReviewInput) => {
     throw new AppError(status.CONFLICT, "You have already reviewed this media.");
   }
 
+  // Deduplicate and sanitize tag names & IDs
+  const rawTags = [
+    ...(payload.tags ?? []),
+    ...(payload.tagNames ?? []),
+  ];
+
+  const tagNames = Array.from(
+    new Set(
+      rawTags
+        .map((tag) => tag.trim())
+        .filter((tag) => tag.length > 0),
+    ),
+  );
+
+  const tagIds = Array.from(
+    new Set(
+      (payload.tagIds ?? [])
+        .map((id) => id.trim())
+        .filter((id) => id.length > 0),
+    ),
+  );
+
   return prisma.$transaction(async (transaction) => {
     const review = await transaction.review.create({
       data: {
@@ -90,6 +113,28 @@ const createReview = async (user: IRequest, payload: TCreateReviewInput) => {
         rating: payload.rating,
         content: payload.content,
         isSpoiler: payload.isSpoiler ?? false,
+        ...(tagNames.length || tagIds.length
+          ? {
+              tags: {
+                ...(tagNames.length
+                  ? {
+                      connectOrCreate: tagNames.map((name) => ({
+                        where: { name },
+                        create: { name },
+                      })),
+                    }
+                  : {}),
+                ...(tagIds.length
+                  ? {
+                      connect: tagIds.map((id) => ({ id })),
+                    }
+                  : {}),
+              },
+            }
+          : {}),
+      },
+      include: {
+        tags: true,
       },
     });
 
@@ -344,15 +389,74 @@ const updateReview = async (
     );
   }
 
+  const rawUpdateTags =
+    payload.tags !== undefined || payload.tagNames !== undefined
+      ? [
+          ...(payload.tags ?? []),
+          ...(payload.tagNames ?? []),
+        ]
+      : undefined;
+
+  const tagNames =
+    rawUpdateTags !== undefined
+      ? Array.from(
+          new Set(
+            rawUpdateTags
+              .map((tag) => tag.trim())
+              .filter((tag) => tag.length > 0),
+          ),
+        )
+      : undefined;
+
+  const tagIds =
+    payload.tagIds !== undefined
+      ? Array.from(
+          new Set(
+            payload.tagIds
+              .map((id) => id.trim())
+              .filter((id) => id.length > 0),
+          ),
+        )
+      : undefined;
+
+  const hasTagUpdate = tagNames !== undefined || tagIds !== undefined;
+
   return prisma.$transaction(async (transaction) => {
+    let finalTagIds: string[] = [];
+    if (hasTagUpdate) {
+      if (tagIds?.length) {
+        finalTagIds.push(...tagIds);
+      }
+      if (tagNames?.length) {
+        for (const name of tagNames) {
+          const tag = await transaction.tag.upsert({
+            where: { name },
+            create: { name },
+            update: {},
+            select: { id: true },
+          });
+          finalTagIds.push(tag.id);
+        }
+      }
+      finalTagIds = Array.from(new Set(finalTagIds));
+    }
+
     const updatedReview = await transaction.review.update({
       where: { id: review.id },
       data: {
         ...(payload.rating !== undefined ? { rating: payload.rating } : {}),
         ...(payload.content !== undefined ? { content: payload.content } : {}),
         ...(payload.isSpoiler !== undefined ? { isSpoiler: payload.isSpoiler } : {}),
+        ...(hasTagUpdate
+          ? {
+              tags: {
+                set: finalTagIds.map((id) => ({ id })),
+              },
+            }
+          : {}),
       },
       include: {
+        tags: true,
         reviewLikes: true,
         comments: {
           include: {

@@ -104,6 +104,7 @@ const getAllMedia = async () => {
       mediaAvailabilities: { include: { Platform: true } },
       reviews:{
         include:{
+          tags: true,
           reviewLikes:true,
           reports:true,
           comments:{
@@ -157,6 +158,7 @@ const getMediaById = async (id: string) => {
       mediaAvailabilities: { include: { Platform: true } },
       reviews:{
         include:{
+          tags: true,
           reviewLikes:true,
           moderator:true,
           user:true,
