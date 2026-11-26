@@ -10,6 +10,68 @@ import {
 } from "./review.interface";
 import { ReviewStatus } from "../../../generated/prisma/enums";
 
+const resolveAdminTagIds = async (payload: {
+  tagId?: string;
+  tagIds?: string[];
+  tags?: string[];
+  tagNames?: string[];
+}) => {
+  const tagIds = Array.from(
+    new Set(
+      [
+        ...(payload.tagId ? [payload.tagId] : []),
+        ...(payload.tagIds ?? []),
+      ]
+        .map((id) => id.trim())
+        .filter((id) => id.length > 0),
+    ),
+  );
+
+  const tagNames = Array.from(
+    new Set(
+      [...(payload.tags ?? []), ...(payload.tagNames ?? [])]
+        .map((tag) => tag.trim())
+        .filter((tag) => tag.length > 0),
+    ),
+  );
+
+  const resolvedTagIds: string[] = [];
+
+  if (tagIds.length > 0) {
+    const existingTagsById = await prisma.tag.findMany({
+      where: { id: { in: tagIds } },
+      select: { id: true },
+    });
+
+    if (existingTagsById.length !== tagIds.length) {
+      throw new AppError(
+        status.NOT_FOUND,
+        "One or more tags not found. Tags must be created by an admin.",
+      );
+    }
+
+    resolvedTagIds.push(...existingTagsById.map((tag) => tag.id));
+  }
+
+  if (tagNames.length > 0) {
+    const existingTagsByName = await prisma.tag.findMany({
+      where: { name: { in: tagNames } },
+      select: { id: true },
+    });
+
+    if (existingTagsByName.length !== tagNames.length) {
+      throw new AppError(
+        status.NOT_FOUND,
+        "One or more tags not found. Tags must be created by an admin.",
+      );
+    }
+
+    resolvedTagIds.push(...existingTagsByName.map((tag) => tag.id));
+  }
+
+  return Array.from(new Set(resolvedTagIds));
+};
+
 const getMyReviews = async (user: IRequest) => {
   return prisma.review.findMany({
     where: {
@@ -83,27 +145,7 @@ const createReview = async (user: IRequest, payload: TCreateReviewInput) => {
     throw new AppError(status.CONFLICT, "You have already reviewed this media.");
   }
 
-  // Deduplicate and sanitize tag names & IDs
-  const rawTags = [
-    ...(payload.tags ?? []),
-    ...(payload.tagNames ?? []),
-  ];
-
-  const tagNames = Array.from(
-    new Set(
-      rawTags
-        .map((tag) => tag.trim())
-        .filter((tag) => tag.length > 0),
-    ),
-  );
-
-  const tagIds = Array.from(
-    new Set(
-      (payload.tagIds ?? [])
-        .map((id) => id.trim())
-        .filter((id) => id.length > 0),
-    ),
-  );
+  const resolvedTagIds = await resolveAdminTagIds(payload);
 
   return prisma.$transaction(async (transaction) => {
     const review = await transaction.review.create({
@@ -113,22 +155,10 @@ const createReview = async (user: IRequest, payload: TCreateReviewInput) => {
         rating: payload.rating,
         content: payload.content,
         isSpoiler: payload.isSpoiler ?? false,
-        ...(tagNames.length || tagIds.length
+        ...(resolvedTagIds.length > 0
           ? {
               tags: {
-                ...(tagNames.length
-                  ? {
-                      connectOrCreate: tagNames.map((name) => ({
-                        where: { name },
-                        create: { name },
-                      })),
-                    }
-                  : {}),
-                ...(tagIds.length
-                  ? {
-                      connect: tagIds.map((id) => ({ id })),
-                    }
-                  : {}),
+                connect: resolvedTagIds.map((id) => ({ id })),
               },
             }
           : {}),
@@ -389,58 +419,15 @@ const updateReview = async (
     );
   }
 
-  const rawUpdateTags =
-    payload.tags !== undefined || payload.tagNames !== undefined
-      ? [
-          ...(payload.tags ?? []),
-          ...(payload.tagNames ?? []),
-        ]
-      : undefined;
+  const hasTagUpdate =
+    payload.tagId !== undefined ||
+    payload.tagIds !== undefined ||
+    payload.tags !== undefined ||
+    payload.tagNames !== undefined;
 
-  const tagNames =
-    rawUpdateTags !== undefined
-      ? Array.from(
-          new Set(
-            rawUpdateTags
-              .map((tag) => tag.trim())
-              .filter((tag) => tag.length > 0),
-          ),
-        )
-      : undefined;
-
-  const tagIds =
-    payload.tagIds !== undefined
-      ? Array.from(
-          new Set(
-            payload.tagIds
-              .map((id) => id.trim())
-              .filter((id) => id.length > 0),
-          ),
-        )
-      : undefined;
-
-  const hasTagUpdate = tagNames !== undefined || tagIds !== undefined;
+  const finalTagIds = hasTagUpdate ? await resolveAdminTagIds(payload) : [];
 
   return prisma.$transaction(async (transaction) => {
-    let finalTagIds: string[] = [];
-    if (hasTagUpdate) {
-      if (tagIds?.length) {
-        finalTagIds.push(...tagIds);
-      }
-      if (tagNames?.length) {
-        for (const name of tagNames) {
-          const tag = await transaction.tag.upsert({
-            where: { name },
-            create: { name },
-            update: {},
-            select: { id: true },
-          });
-          finalTagIds.push(tag.id);
-        }
-      }
-      finalTagIds = Array.from(new Set(finalTagIds));
-    }
-
     const updatedReview = await transaction.review.update({
       where: { id: review.id },
       data: {
