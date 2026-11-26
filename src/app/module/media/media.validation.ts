@@ -103,5 +103,9 @@ price: z.coerce.number().nonnegative().nullable().optional(),
     }
   });
 
+export const updateMediaStatusValidation = z.object({
+  status: z.enum(MediaStatus),
+});
+
 
   

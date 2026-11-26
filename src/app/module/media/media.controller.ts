@@ -60,8 +60,24 @@ const getMediaById = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const updateMediaStatus = catchAsync(async (req: Request, res: Response) => {
+  const data = await mediaService.updateMediaStatus(
+    req.params.id as string,
+    req.body,
+  );
+
+  sendResponse({
+    res,
+    statusCode: 200,
+    success: true,
+    message: "Media status updated successfully.",
+    data,
+  });
+});
+
 export const mediaController = {
   createMedia,
   getAllMedia,
   getMediaById,
+  updateMediaStatus,
 };

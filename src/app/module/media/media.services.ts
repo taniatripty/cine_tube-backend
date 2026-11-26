@@ -1,7 +1,10 @@
 import status from "http-status";
 import AppError from "../../errorHandler/AppError";
 import { prisma } from "../../lib/prisma";
-import { TCreateMediaInput } from "./media.interface";
+import {
+  TCreateMediaInput,
+  TUpdateMediaStatusInput,
+} from "./media.interface";
 
 const createMedia = async (payload: TCreateMediaInput) => {
   const { genreIds, credits, availabilities, ...mediaData } = payload;
@@ -200,8 +203,33 @@ const getMediaById = async (id: string) => {
   return result;
 };
 
+const updateMediaStatus = async (
+  mediaId: string,
+  payload: TUpdateMediaStatusInput,
+) => {
+  const media = await prisma.media.findFirst({
+    where: {
+      id: mediaId,
+      isDeleted: false,
+    },
+    select: { id: true },
+  });
+
+  if (!media) {
+    throw new AppError(status.NOT_FOUND, "Media not found.");
+  }
+
+  return prisma.media.update({
+    where: { id: media.id },
+    data: {
+      status: payload.status,
+    },
+  });
+};
+
 export const mediaService = {
   createMedia,
   getAllMedia,
   getMediaById,
+  updateMediaStatus,
 };

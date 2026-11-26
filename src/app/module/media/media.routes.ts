@@ -4,7 +4,10 @@ import { checkAuth } from "../../middleware/checkAuth";
 import { validateRequest } from "../../middleware/validateRequest";
 import { multerUpload } from "../../config/multer.confing";
 import { mediaController } from "./media.controller";
-import { createMediaValidation } from "./media.validation";
+import {
+  createMediaValidation,
+  updateMediaStatusValidation,
+} from "./media.validation";
 
 const router = Router();
 
@@ -15,7 +18,7 @@ router.get(
 );
 router.get(
   "/:id",
-  checkAuth(UserRole.ADMIN, UserRole.USER),
+  
   mediaController.getMediaById,
 );
 router.post(
@@ -27,6 +30,13 @@ router.post(
   ]),
   validateRequest(createMediaValidation),
   mediaController.createMedia,
+);
+
+router.patch(
+  "/:id/status",
+  checkAuth(UserRole.ADMIN),
+  validateRequest(updateMediaStatusValidation),
+  mediaController.updateMediaStatus,
 );
 
 export const mediaRoutes = router;
