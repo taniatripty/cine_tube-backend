@@ -12,6 +12,8 @@ import {
 
 const router = Router();
 
+router.get("/all", reviewController.getAllReviews);
+
 router.get(
   "/",
   checkAuth(UserRole.ADMIN, UserRole.USER),

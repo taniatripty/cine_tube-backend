@@ -72,46 +72,67 @@ const resolveAdminTagIds = async (payload: {
   return Array.from(new Set(resolvedTagIds));
 };
 
+const reviewDetailsInclude = {
+  media: {
+    select: {
+      id: true,
+      title: true,
+      synopsis: true,
+      poster: true,
+      backdrop: true,
+      type: true,
+      releaseYear: true,
+      averageRating: true,
+      reviewCount: true,
+      reactionCount: true,
+    },
+  },
+  tags: true,
+  reviewLikes: true,
+  comments: {
+    include: {
+      commentLikes: true,
+      _count: {
+        select: {
+          commentLikes: true,
+          replies: true,
+        },
+      },
+    },
+  },
+  _count: {
+    select: {
+      reviewLikes: true,
+      comments: true,
+    },
+  },
+};
+
+const getAllReviews = async () => {
+  return prisma.review.findMany({
+    include: {
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          image: true,
+        },
+      },
+      ...reviewDetailsInclude,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+};
+
 const getMyReviews = async (user: IRequest) => {
   return prisma.review.findMany({
     where: {
       userId: user.userId,
     },
-    include: {
-      media: {
-        select: {
-          id: true,
-          title: true,
-          synopsis: true,
-          poster: true,
-          backdrop: true,
-          type: true,
-          releaseYear: true,
-          averageRating: true,
-          reviewCount: true,
-          reactionCount: true,
-        },
-      },
-      tags: true,
-      reviewLikes: true,
-      comments: {
-        include: {
-          commentLikes: true,
-          _count: {
-            select: {
-              commentLikes: true,
-              replies: true,
-            },
-          },
-        },
-      },
-      _count: {
-        select: {
-          reviewLikes: true,
-          comments: true,
-        },
-      },
-    },
+    include: reviewDetailsInclude,
     orderBy: {
       createdAt: "desc",
     },
@@ -541,6 +562,7 @@ const deleteReview = async (user: IRequest, reviewId: string) => {
 };
 
 export const reviewService = {
+  getAllReviews,
   getMyReviews,
   createReview,
   updateReview,

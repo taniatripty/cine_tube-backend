@@ -99,6 +99,7 @@ const getAllMedia = async () => {
   const result = prisma.media.findMany({
     where: {
       isDeleted: false,
+      status:"PUBLISHED"
     },
     include: {
       genres: true,
@@ -106,6 +107,9 @@ const getAllMedia = async () => {
       credits: { include: { person: true } },
       mediaAvailabilities: { include: { Platform: true } },
       reviews:{
+        where:{
+          status:"APPROVED"
+        },
         include:{
           tags: true,
           reviewLikes:true,
@@ -153,6 +157,7 @@ const getMediaById = async (id: string) => {
     where: {
       id,
       isDeleted: false,
+       status:"PUBLISHED"
     },
      include: {
       genres: true,
@@ -160,6 +165,9 @@ const getMediaById = async (id: string) => {
       credits: { include: { person: true } },
       mediaAvailabilities: { include: { Platform: true } },
       reviews:{
+         where:{
+          status:"APPROVED"
+        },
         include:{
           tags: true,
           reviewLikes:true,
@@ -167,6 +175,9 @@ const getMediaById = async (id: string) => {
           user:true,
           reports:true,
           comments:{
+             where:{
+          status:"APPROVED"
+        },
             include:{
               commentLikes:true,
               user:true,
