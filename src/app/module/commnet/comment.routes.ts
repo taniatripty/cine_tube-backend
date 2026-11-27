@@ -12,6 +12,14 @@ import {
 
 const router = Router();
 
+router.get("/all", commentController.getAllComments);
+
+router.get(
+  "/",
+  checkAuth(UserRole.ADMIN, UserRole.USER),
+  commentController.getMyComments,
+);
+
 router.post(
   "/",
   checkAuth(UserRole.ADMIN, UserRole.USER),

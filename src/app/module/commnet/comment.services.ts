@@ -10,6 +10,93 @@ import {
 } from "./comment.interface";
 import { CommentStatus } from "../../../generated/prisma/enums";
 
+const commentDetailsInclude = {
+  review: {
+    select: {
+      id: true,
+      mediaId: true,
+      rating: true,
+      content: true,
+      status: true,
+      media: {
+        select: {
+          id: true,
+          title: true,
+          poster: true,
+          type: true,
+        },
+      },
+    },
+  },
+  parent: {
+    select: {
+      id: true,
+      content: true,
+      userId: true,
+    },
+  },
+  replies: {
+    include: {
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          image: true,
+        },
+      },
+      commentLikes: true,
+      _count: {
+        select: {
+          commentLikes: true,
+          replies: true,
+        },
+      },
+    },
+    orderBy: {
+      createdAt: "asc" as const,
+    },
+  },
+  commentLikes: true,
+  _count: {
+    select: {
+      commentLikes: true,
+      replies: true,
+    },
+  },
+};
+
+const getAllComments = async () => {
+  return prisma.comment.findMany({
+    include: {
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          image: true,
+        },
+      },
+      ...commentDetailsInclude,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+};
+
+const getMyComments = async (user: IRequest) => {
+  return prisma.comment.findMany({
+    where: {
+      userId: user.userId,
+    },
+    include: commentDetailsInclude,
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+};
+
 const createComment = async (
   user: IRequest,
   payload: TCreateCommentInput,
@@ -325,6 +412,8 @@ const deleteComment = async (user: IRequest, commentId: string) => {
 };
 
 export const commentService = {
+  getAllComments,
+  getMyComments,
   createComment,
   updateComment,
   deleteComment,

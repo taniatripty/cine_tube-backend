@@ -3,6 +3,30 @@ import catchAsync from "../../shared/catchAsync";
 import sendResponse from "../../shared/sendResponse";
 import { commentService } from "./comment.services";
 
+const getAllComments = catchAsync(async (_req: Request, res: Response) => {
+  const data = await commentService.getAllComments();
+
+  sendResponse({
+    res,
+    statusCode: 200,
+    success: true,
+    message: "Comments retrieved successfully.",
+    data,
+  });
+});
+
+const getMyComments = catchAsync(async (req: Request, res: Response) => {
+  const data = await commentService.getMyComments(req.user);
+
+  sendResponse({
+    res,
+    statusCode: 200,
+    success: true,
+    message: "Comments retrieved successfully.",
+    data,
+  });
+});
+
 const createComment = catchAsync(async (req: Request, res: Response) => {
   const data = await commentService.createComment(req.user, req.body);
 
@@ -94,6 +118,8 @@ const deleteComment = catchAsync(async (req: Request, res: Response) => {
 });
 
 export const commentController = {
+  getAllComments,
+  getMyComments,
   createComment,
   updateComment,
   deleteComment,
