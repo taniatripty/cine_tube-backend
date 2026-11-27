@@ -15,6 +15,7 @@ import { reviewRoutes } from "../module/review/review.route";
 import { tagRoutes } from "../module/tag/tag.routes";
 import { commentRoutes } from "../module/commnet/comment.routes";
 import { contentReportRoutes } from "../module/contentReport/contentReport.routes";
+import { userRoutes } from "../module/user/user.routes";
 
 
 
@@ -36,5 +37,6 @@ router.use("/reviews", reviewRoutes);
 router.use("/tags", tagRoutes);
 router.use("/comments", commentRoutes);
 router.use("/content-reports", contentReportRoutes);
+router.use("/users", userRoutes);
 
 export const indexRoutes=router;
